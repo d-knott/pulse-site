@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0c0d0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pulse">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse — Health & Training Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0d0d; --bg2:#101313; --card:#151818; --card2:#1b1f1f;
+    --border:#242a29; --border2:#313938;
+    --text:#eef2f1; --text2:#9aa6a3; --text3:#68716f;
+    --teal:#79e2d7; --blue:#95b9ff; --purple:#bfa8ff; --orange:#ffc966;
+    --green:#a6fb99; --red:#ff6e66; --pink:#ff8fa3; --cyan:#8fe8ff;
+    --radius:20px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'General Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--text); font-size:14px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---------- Layout ---------- */
+  .app{display:flex; min-height:100vh}
+  .sidebar{
+    width:220px; background:var(--bg2); border-right:1px solid var(--border);
+    padding:20px 12px; position:fixed; top:0; bottom:0; left:0; z-index:50;
+    display:flex; flex-direction:column;
+  }
+  .logo{display:flex; align-items:center; gap:10px; padding:6px 10px 22px}
+  .logo-mark{
+    width:34px;height:34px;border-radius:11px;
+    background:var(--teal);
+    display:flex;align-items:center;justify-content:center;font-weight:700;color:#0e1615;font-size:16px;
+  }
+  .logo-name{font-weight:700;font-size:17px;letter-spacing:.3px}
+  .logo-name span{color:var(--teal)}
+  .nav{display:flex;flex-direction:column;gap:2px;flex:1}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;
+    color:var(--text2);cursor:pointer;font-weight:500;border:none;background:none;
+    font-size:13.5px;text-align:left;width:100%;transition:all .15s;
+  }
+  .nav-item svg{width:18px;height:18px;flex-shrink:0}
+  .nav-item:hover{background:var(--card);color:var(--text)}
+  .nav-item.active{background:rgba(121,226,215,.13);color:var(--teal);border-radius:12px}
+  .nav-sep{height:1px;background:var(--border);margin:10px 6px}
+  .sidebar-foot{padding:12px 10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  .sidebar-foot .u-name{font-weight:600;font-size:13px}
+  .sidebar-foot .u-sub{font-size:11px;color:var(--text3)}
+  .main{margin-left:220px;flex:1;padding:24px 28px 60px;max-width:1240px}
+  /* ---------- Header ---------- */
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+  .header h1{font-size:22px;font-weight:700}
+  .header .sub{color:var(--text2);font-size:13px;margin-top:2px}
+  .header-right{display:flex;align-items:center;gap:10px}
+  .pill{
+    display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:99px;
+    background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--text2);font-weight:500;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .btn{
+    padding:9px 18px;border-radius:99px;border:1px solid var(--border2);background:var(--card2);
+    color:var(--text);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;
+  }
+  .btn:hover{border-color:var(--teal);color:var(--teal)}
+  .btn.primary{background:var(--teal);border:1px solid var(--teal);color:#0e1615}
+  .btn.primary:hover{filter:brightness(1.08);color:#0e1615}
+  /* ---------- Cards & grid ---------- */
+  .grid{display:grid;gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g23{grid-template-columns:2fr 1fr}
+  .g32{grid-template-columns:1fr 2fr}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;position:relative;
+  }
+  .card-title{font-size:12.5px;font-weight:500;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+  .card-title .tag{font-size:10.5px;padding:3px 10px;border-radius:99px;background:var(--card2);border:1px solid var(--border);color:var(--text3)}
+  .card-title .t-ic{width:28px;height:28px;border-radius:9px;background:var(--card2);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+  .metric{font-size:30px;font-weight:700;letter-spacing:-.4px;margin:4px 0 2px}
+  .metric small{font-size:14px;font-weight:600;color:var(--text2);margin-left:2px}
+  .delta{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+  .delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--text3)}
+  .spark{margin-top:10px;height:42px}
+  .chart-wrap{position:relative;margin-top:12px}
+  section.tab{display:none;animation:fadeIn .25s ease}
+  section.tab.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .mt{margin-top:16px}
+  h2.sec{font-size:15px;font-weight:700;margin:26px 0 14px;display:flex;align-items:center;gap:8px}
+  h2.sec::after{content:"";flex:1;height:1px;background:var(--border)}
+  /* ---------- Rings / gauges ---------- */
+  .ring-row{display:flex;align-items:center;gap:18px}
+  .ring{position:relative;width:110px;height:110px;flex-shrink:0}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .ring-num{font-size:26px;font-weight:800;line-height:1}
+  .ring .ring-cap{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-top:3px}
+  .ring-legend{flex:1;display:flex;flex-direction:column;gap:8px}
+  .lg-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px}
+  .lg-row .lg-l{display:flex;align-items:center;gap:8px;color:var(--text2)}
+  .lg-dot{width:9px;height:9px;border-radius:3px}
+  .lg-v{font-weight:700}
+  /* ---------- Insight cards ---------- */
+  .insight{
+    border-left:4px solid var(--teal);background:var(--card);border-radius:18px;
+    border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+    padding:14px 16px;display:flex;gap:13px;align-items:flex-start;
+  }
+  .insight .ic{
+    width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;font-size:16px;background:rgba(121,226,215,.12);
+  }
+  .insight.warn{border-left-color:var(--orange)} .insight.warn .ic{background:rgba(255,201,102,.12)}
+  .insight.alert{border-left-color:var(--red)} .insight.alert .ic{background:rgba(255,110,102,.12)}
+  .insight.info{border-left-color:var(--blue)} .insight.info .ic{background:rgba(149,185,255,.12)}
+  .insight.good{border-left-color:var(--green)} .insight.good .ic{background:rgba(166,251,153,.12)}
+  .insight h4{font-size:13.5px;font-weight:700;margin-bottom:2px}
+  .insight p{font-size:12.5px;color:var(--text2)}
+  .insight .fb{margin-top:8px;display:flex;gap:6px}
+  .fb-btn{
+    font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid var(--border2);
+    background:transparent;color:var(--text3);cursor:pointer;transition:all .15s;
+  }
+  .fb-btn:hover{color:var(--teal);border-color:var(--teal)}
+  .fb-btn.sel{background:rgba(121,226,215,.15);color:var(--teal);border-color:var(--teal)}
+  /* ---------- Tables ---------- */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.7px;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border)}
+  td{padding:11px 10px;border-bottom:1px solid var(--border);color:var(--text2)}
+  td:first-child{color:var(--text);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  tr.clickable:hover td{background:rgba(121,226,215,.04);cursor:pointer}
+  .sport-ic{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;margin-right:9px;vertical-align:middle}
+  .badge{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px}
+  .badge.low{background:rgba(166,251,153,.14);color:var(--green)}
+  .badge.mod{background:rgba(255,201,102,.14);color:var(--orange)}
+  .badge.high{background:rgba(255,110,102,.14);color:var(--red)}
+  .badge.peak{background:rgba(191,168,255,.16);color:var(--purple)}
+  /* ---------- Muscle map ---------- */
+  .muscle-wrap{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+  .body-figs{display:flex;gap:14px;flex-shrink:0}
+  .body-fig{text-align:center}
+  .body-fig .cap{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-top:6px}
+  .muscle{cursor:pointer;transition:opacity .15s}
+  .muscle:hover{filter:brightness(1.3)}
+  .muscle.dim{opacity:.15}
+  .muscle.hot{filter:drop-shadow(0 0 5px rgba(255,255,255,.8)) brightness(1.3)}
+  .m-list{max-height:600px;overflow-y:auto;padding-right:4px}
+  .m-legend{display:flex;gap:14px;margin:2px 0 16px;flex-wrap:wrap}
+  .m-legend .lg{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text2)}
+  .m-list{flex:1;min-width:280px;display:flex;flex-direction:column;gap:9px}
+  .m-row{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:11px 14px;cursor:pointer;transition:border-color .15s}
+  .m-row:hover,.m-row.sel{border-color:var(--teal)}
+  .m-row .m-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+  .m-row .m-name{font-weight:700;font-size:13px}
+  .m-row .m-val{font-size:12px;font-weight:700}
+  .m-bar{height:6px;border-radius:99px;background:var(--bg);overflow:hidden}
+  .m-bar i{display:block;height:100%;border-radius:99px}
+  .m-row .m-sub{font-size:11px;color:var(--text3);margin-top:6px;display:flex;justify-content:space-between}
+  /* ---------- Sleep / misc ---------- */
+  .stage-bar{display:flex;height:26px;border-radius:8px;overflow:hidden;margin-top:12px}
+  .stage-bar div{height:100%}
+  .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--text2)} .kv .v{font-weight:700}
+  /* ---------- Gym sessions ---------- */
+  .ta{width:100%;min-height:170px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
+    color:var(--text);padding:12px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;resize:vertical;line-height:1.7}
+  .ta:focus{outline:none;border-color:var(--teal)}
+  .imp-row{display:flex;align-items:center;gap:10px;font-size:12.5px;margin:7px 0}
+  .imp-name{width:118px;color:var(--text2);flex-shrink:0}
+  .imp-track{flex:1;height:8px;background:var(--bg);border-radius:99px;overflow:hidden}
+  .imp-fill{height:100%;border-radius:99px;transition:width .5s ease}
+  .imp-val{width:56px;text-align:right;font-weight:700;flex-shrink:0}
+  .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+  .sum-cell{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:11px 13px}
+  .sum-cell .s-k{font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
+  .sum-cell .s-v{font-size:19px;font-weight:800;margin-top:2px}
+  @media(max-width:1080px){.sum-grid{grid-template-columns:repeat(2,1fr)}}
+  /* ---------- Calendar ---------- */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .cal-month{font-size:17px;font-weight:700}
+  .cal-nav{display:flex;gap:6px}
+  .cal-nav button{width:32px;height:32px;border-radius:10px;border:1px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;font-size:14px}
+  .cal-nav button:hover{border-color:var(--teal);color:var(--teal)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+  .cal-dow{font-size:10.5px;color:var(--text3);text-align:center;padding:2px 0;font-weight:600}
+  .cal-cell{background:var(--card2);border:1px solid var(--border);border-radius:14px;min-height:92px;padding:7px 7px;cursor:pointer;transition:border-color .15s;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+  .cal-cell:hover{border-color:var(--teal)}
+  .cal-cell.other{opacity:.3}
+  .cal-cell.today{box-shadow:inset 0 0 0 1.5px var(--teal)}
+  .cal-cell.sel{box-shadow:inset 0 0 0 1.5px var(--orange)}
+  .cal-num{font-size:11px;color:var(--text3);font-weight:600}
+  .cal-cell.today .cal-num{color:var(--teal)}
+  .cal-chip{font-size:9.5px;font-weight:600;padding:2.5px 6px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#0e1615}
+  .cal-chip.done{opacity:.5}
+  .cal-chip.ghost{background:transparent!important;border:1px dashed var(--border2);color:var(--text2)}
+  .cal-more{font-size:9.5px;color:var(--text3)}
+  .wk-chips{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .lib-note{font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.5}
+  /* ---------- Forms & planner ---------- */
+  .fld{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--text3)}
+  .fld select,.fld input{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;color:var(--text);padding:9px 12px;font-size:13px;font-family:inherit}
+  .fld select:focus,.fld input:focus{outline:none;border-color:var(--teal)}
+  .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-top:12px}
+  .plan-card{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:12px 15px;margin-top:10px}
+  .plan-card .p-top{display:flex;justify-content:space-between;align-items:center}
+  .plan-card .p-name{font-weight:600;font-size:13.5px}
+  .plan-card .p-meta{font-size:11.5px;color:var(--text3);margin-top:5px;display:flex;gap:12px;flex-wrap:wrap}
+  .plan-x{background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px 6px;border-radius:8px}
+  .plan-x:hover{color:var(--red)}
+  /* ---------- Settings ---------- */
+  .conn{display:flex;align-items:center;gap:15px;padding:17px 18px;background:var(--card2);border:1px solid var(--border);border-radius:20px}
+  /* Flexion-style segmented goal bar */
+  .seg-wrap{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:99px;padding:6px;margin-top:12px}
+  .seg-track{flex:1;height:22px;border-radius:99px;background:var(--bg);overflow:hidden;display:flex}
+  .seg-fill{background:var(--teal);border-radius:99px;background-image:repeating-linear-gradient(115deg,transparent 0 10px,rgba(12,13,13,.22) 10px 13px)}
+  .seg-chip{font-size:11px;font-weight:600;color:var(--text2);background:var(--card);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;white-space:nowrap}
+  .conn .c-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0}
+  .conn .c-body{flex:1}
+  .conn .c-name{font-weight:700;font-size:14px}
+  .conn .c-sub{font-size:12px;color:var(--text3);margin-top:1px}
+  .switch{position:relative;width:42px;height:24px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:var(--border2);border-radius:99px;cursor:pointer;transition:.2s}
+  .slider::before{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}
+  .switch input:checked + .slider{background:var(--teal)}
+  .switch input:checked + .slider::before{transform:translateX(18px)}
+  .note{font-size:12px;color:var(--text3);background:var(--card2);border:1px dashed var(--border2);border-radius:12px;padding:12px 15px;margin-top:14px}
+  /* ---------- Tooltip ---------- */
+  #tt{position:fixed;pointer-events:none;background:#1e2424;border:1px solid var(--border2);border-radius:10px;padding:8px 12px;font-size:12px;z-index:99;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  #tt b{display:block;font-size:12.5px}
+  #tt span{color:var(--text2)}
+  /* ---------- Toast ---------- */
+  #toast{position:fixed;bottom:24px;right:24px;background:#1e2424;border:1px solid var(--teal);color:var(--text);padding:12px 18px;border-radius:12px;font-size:13px;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  /* ---------- Responsive ---------- */
+  @media(max-width:1080px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}.g23,.g32{grid-template-columns:1fr}}
+  @media(max-width:760px){
+    .sidebar{width:100%;height:auto;position:sticky;flex-direction:row;align-items:center;padding:10px;bottom:auto;overflow-x:auto}
+    .nav{flex-direction:row}.nav-item span{display:none}.nav-sep,.sidebar-foot,.logo-name{display:none}
+    .main{margin-left:0;padding:16px}
+    .g4,.g3,.g2{grid-template-columns:1fr}
+    .body-figs{margin:0 auto}
+  }
+  /* ---- Log tab ---- */
+  .log-lab{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin:14px 0 7px}
+  .logrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .log-in{background:var(--card2);border:1px solid var(--border);border-radius:12px;color:var(--text);padding:9px 12px;font-family:inherit;font-size:13px}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{min-width:36px;padding:8px 0;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;font-size:12.5px}
+  .seg button.sel{background:var(--teal);color:#04231e;font-weight:800;border-color:transparent}
+  .seg button:hover{border-color:var(--border2);color:var(--text)}
+  .log-saved{color:var(--teal);font-size:12px;font-weight:600}
+  .water-bar{height:10px;border-radius:99px;background:var(--card2);overflow:hidden;margin-top:10px}
+  .water-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--teal));transition:width .4s}
+</style>
+</head>
+<body>
+<div id="tt"></div>
+<div id="toast"></div>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">✦</div>
+      <div class="logo-name">Pulse<span>.</span></div>
+    </div>
+    <!-- Nav icons: Nucleo UI Essential (free/open-source set) — nucleoapp.com -->
+    <nav class="nav">
+      <button class="nav-item active" data-tab="today">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 16V12.75"/><path d="M3.145 5.95L8.395 1.96C8.753 1.688 9.248 1.688 9.605 1.96L14.855 5.95C15.104 6.139 15.25 6.434 15.25 6.746V14.25C15.25 15.355 14.355 16.25 13.25 16.25H4.75C3.645 16.25 2.75 15.355 2.75 14.25V6.746C2.75 6.433 2.896 6.139 3.145 5.95Z"/></svg>
+        <span>Today</span>
+      </button>
+      <button class="nav-item" data-tab="calendar">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5.75" y1="2.75" x2="5.75" y2=".75"/><line x1="12.25" y1="2.75" x2="12.25" y2=".75"/><rect x="2.25" y="2.75" width="13.5" height="12.5" rx="2" ry="2"/><line x1="2.25" y1="6.25" x2="15.75" y2="6.25"/><path d="M9,8.25c-.551,0-1,.449-1,1s.449,1,1,1,1-.449,1-1-.449-1-1-1Z" fill="currentColor" stroke="none"/><path d="M12.5,10.25c.551,0,1-.449,1-1s-.449-1-1-1-1,.449-1,1,.449,1,1,1Z" fill="currentColor" stroke="none"/><path d="M9,11.25c-.551,0-1,.449-1,1s.449,1,1,1,1-.449,1-1-.449-1-1-1Z" fill="currentColor" stroke="none"/><path d="M5.5,11.25c-.551,0-1,.449-1,1s.449,1,1,1,1-.449,1-1-.449-1-1-1Z" fill="currentColor" stroke="none"/><path d="M12.5,11.25c-.551,0-1,.449-1,1s.449,1,1,1,1-.449,1-1-.449-1-1-1Z" fill="currentColor" stroke="none"/></svg>
+        <span>Calendar</span>
+      </button>
+      <button class="nav-item" data-tab="activity">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7505 7.25H9.49905L9.81065 1.9868C9.82325 1.7732 9.55085 1.6734 9.42255 1.8446L3.04965 10.3501C2.92615 10.5149 3.04376 10.75 3.24976 10.75H8.50115L8.18955 16.0132C8.17695 16.2268 8.44935 16.3266 8.57765 16.1554L14.9506 7.6499C15.0741 7.4851 14.9565 7.25 14.7505 7.25Z"/></svg>
+        <span>Activity</span>
+      </button>
+      <button class="nav-item" data-tab="running">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="6.75" y1="1.25" x2="11.25" y2="1.25"/><line x1="9" y1="1.25" x2="9" y2="3.75"/><circle cx="9" cy="10" r="6.25"/><line x1="6.702" y1="7.702" x2="9" y2="10"/><line x1="14.25" y1="2.75" x2="16.25" y2="4.75"/></svg>
+        <span>Running</span>
+      </button>
+      <button class="nav-item" data-tab="hockey">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 3l7 13a3 3 0 0 0 2.6 1.5H18a2 2 0 0 0 0-4h-3L8 3"/><circle cx="18" cy="20" r="1.6"/></svg>
+        <span>Hockey</span>
+      </button>
+      <button class="nav-item" data-tab="sleep">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        <span>Sleep</span>
+      </button>
+      <button class="nav-item" data-tab="recovery">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.529,15.222c.297,.155,.644,.155,.941,0,1.57-.819,6.529-3.787,6.529-8.613,.008-2.12-1.704-3.846-3.826-3.859-1.277,.016-2.464,.66-3.173,1.72-.71-1.06-1.897-1.704-3.173-1.72-2.123,.013-3.834,1.739-3.826,3.859,0,4.826,4.959,7.794,6.529,8.613Z"/></svg>
+        <span>Recovery</span>
+      </button>
+      <button class="nav-item" data-tab="training">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.75V4.75"/><path d="M14.127 4.87299L12.712 6.28799"/><path d="M16.25 10H14.25"/><path d="M3.87305 4.87299L8.29305 9.293"/><path d="M1.75 10H3.75"/><path d="M6.45264 3.2103C7.24504 2.9128 8.10363 2.75 9.00003 2.75C13.004 2.75 16.25 5.996 16.25 10C16.25 12.002 15.439 13.815 14.127 15.127L12.713 13.713"/><path d="M5.28799 13.712L3.87399 15.126C2.56199 13.814 1.75 12.002 1.75 9.99899C1.75 9.10279 1.91271 8.2445 2.21001 7.4523"/><path d="M9 11.25C9.69 11.25 10.25 10.69 10.25 10C10.25 9.31 9.69 8.75 9 8.75C8.31 8.75 7.75 9.31 7.75 10C7.75 10.69 8.31 11.25 9 11.25Z" fill="currentColor"/></svg>
+        <span>Muscle Load</span>
+      </button>
+      <button class="nav-item" data-tab="gym">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13"/><path d="M8 8l4-4 4 4"/><rect x="4" y="16" width="16" height="5" rx="2"/></svg>
+        <span>Gym Sessions</span>
+      </button>
+      <button class="nav-item" data-tab="library">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9,15.051c.17,0,.339-.045,.494-.134,.643-.371,1.732-.847,3.141-.845,.899,.001,1.667,.197,2.27,.435,.648,.255,1.344-.24,1.344-.937V4.487c0-.354-.181-.68-.486-.86-.637-.376-1.726-.863-3.14-.863-1.89,0-3.198,.872-3.624,1.182"/><path d="M9,15.051c-.17,0-.339-.045-.494-.134-.643-.371-1.732-.847-3.141-.845-.899,.001-1.667,.197-2.27,.435-.648,.255-1.344-.237-1.344-.933,0-2.593,0-7.472,0-9.09,0-.354,.181-.676,.486-.856,.637-.376,1.726-.863,3.14-.863,1.89,0,3.198,.872,3.624,1.182h0s0,11.104,0,11.104Z"/></svg>
+        <span>Library</span>
+      </button>
+      <button class="nav-item" data-tab="testing">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.25,2.75h-1c-1.105,0-2,.895-2,2V14.25c0,1.105,.895,2,2,2h7.5c1.105,0,2-.895,2-2V4.75c0-1.105-.895-2-2-2h-1"/><rect x="6.25" y="1.25" width="5.5" height="3" rx="1" ry="1"/><polyline points="6.25 10.25 8 12.25 11.75 7.25"/></svg>
+        <span>Testing &amp; Body</span>
+      </button>
+      <button class="nav-item" data-tab="trends">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="13.25" y="2.75" width="2.5" height="12.5" rx="1" ry="1"/><rect x="7.75" y="7.75" width="2.5" height="7.5" rx="1" ry="1"/><rect x="2.25" y="11.75" width="2.5" height="3.5" rx="1" ry="1"/><polyline points="6.25 2.75 8.75 2.75 8.75 5.25"/><line x1="8.5" y1="3" x2="2.75" y2="8.75"/></svg>
+        <span>Trends</span>
+      </button>
+      <div class="nav-sep"></div>
+      <button class="nav-item" data-tab="sync">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 12.75L10.75 15L8.5 17.25"/><path d="M4.655 4.505C3.4774 5.6413 2.75 7.2359 2.75 9C2.75 12.452 5.55 15.25 9 15.25C9.6 15.25 10.17 15.166 10.72 15.01"/><path d="M9.5 5.25L7.25 3L9.5 0.75"/><path d="M13.3444 13.4937C14.5146 12.3575 15.25 10.7634 15.25 9C15.25 5.548 12.45 2.75 9.00002 2.75C8.42002 2.75 7.86002 2.82895 7.33002 2.97595"/></svg>
+        <span>Data Sync</span>
+      </button>
+      <button class="nav-item" data-tab="settings">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="13.25" y1="5.25" x2="16.25" y2="5.25"/><line x1="1.75" y1="5.25" x2="8.75" y2="5.25"/><circle cx="11" cy="5.25" r="2.25"/><line x1="4.75" y1="12.75" x2="1.75" y2="12.75"/><line x1="16.25" y1="12.75" x2="9.25" y2="12.75"/><circle cx="7" cy="12.75" r="2.25"/></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="avatar">DK</div>
+      <div>
+        <div class="u-name">Athlete</div>
+        <div class="u-sub">Garmin + SSISA data</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="header">
+      <div>
+        <h1 id="page-title">Today</h1>
+        <div class="sub" id="page-sub"></div>
+      </div>
+      <div class="header-right">
+        <div class="pill" id="sync-pill"><span class="dot"></span> Demo data — run garmin_sync.py</div>
+        <button class="btn" onclick="fakeSync()">⟳ Sync now</button>
+      </div>
+    </div>
+
+    <!-- ============ TAB: TODAY ============ -->
+    <section class="tab active" id="tab-today">
+      <div class="grid g4">
+        <div class="card">
+          <div class="card-title">Readiness <span class="t-ic">🎯</span></div>
+          <div class="metric" style="color:var(--teal)" id="m-readiness">78<small>/100</small></div>
+          <span class="delta up" id="d-readiness">▲ 6 vs yesterday</span>
+          <div class="spark"><canvas id="sp-readiness"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Body Battery <span class="t-ic">⚡</span></div>
+          <div class="metric" style="color:var(--blue)" id="m-battery">64<small>/100</small></div>
+          <span class="delta up" id="d-battery">▲ Charged +38 overnight</span>
+          <div class="spark"><canvas id="sp-battery"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">HRV (overnight) <span class="t-ic">💓</span></div>
+          <div class="metric" id="m-hrv">52<small>ms</small></div>
+          <span class="delta flat" id="d-hrv">— Within baseline 48–58 ms</span>
+          <div class="spark"><canvas id="sp-hrv"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Resting HR <span class="t-ic">❤️</span></div>
+          <div class="metric" id="m-rhr">49<small>bpm</small></div>
+          <span class="delta up" id="d-rhr">▼ 2 vs 7-day avg</span>
+          <div class="spark"><canvas id="sp-rhr"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g23 mt">
+        <div class="card">
+          <div class="card-title">Body Battery — last 24 h</div>
+          <div class="chart-wrap" style="height:230px"><canvas id="ch-battery24"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Daily goals</div>
+          <div class="seg-wrap">
+            <span class="seg-chip" style="background:var(--teal);color:#0e1615;border-color:var(--teal)">Achieved</span>
+            <div class="seg-track"><div class="seg-fill" style="width:64%"></div></div>
+            <span class="seg-chip">3 of 4 goals</span>
+          </div>
+          <div class="ring-row" style="margin-top:14px">
+            <div class="ring" id="ring-steps"></div>
+            <div class="ring-legend">
+              <div class="lg-row"><span class="lg-l"><i class="lg-dot" style="background:var(--teal)"></i>Steps</span><span class="lg-v">8,742 / 10,000</span></div>
+              <div class="lg-row"><span class="lg-l"><i class="lg-dot" style="background:var(--orange)"></i>Active cal</span><span class="lg-v">612 / 700</span></div>
+              <div class="lg-row"><span class="lg-l"><i class="lg-dot" style="background:var(--purple)"></i>Intensity min</span><span class="lg-v">48 / 60</span></div>
+              <div class="lg-row"><span class="lg-l"><i class="lg-dot" style="background:var(--blue)"></i>Floors</span><span class="lg-v">14 / 10 ✓</span></div>
+            </div>
+          </div>
+          <div class="kv" style="margin-top:14px"><span class="k">Stress (avg today)</span><span class="v" style="color:var(--orange)">31 · Moderate</span></div>
+          <div class="kv"><span class="k">SpO₂ (overnight)</span><span class="v">96%</span></div>
+          <div class="kv"><span class="k">Respiration</span><span class="v">13.8 brpm</span></div>
+        </div>
+      </div>
+
+      <h2 class="sec">Insights & feedback</h2>
+      <div class="grid g2" id="insights-today"></div>
+    </section>
+
+    <!-- ============ TAB: ACTIVITY ============ -->
+    <section class="tab" id="tab-activity">
+      <div class="grid g4">
+        <div class="card"><div class="card-title">7-day load</div><div class="metric" id="m-load7">612</div><span class="delta up" id="d-load7">▲ Optimal range 480–720</span></div>
+        <div class="card"><div class="card-title">This week</div><div class="metric">5<small>activities</small></div><span class="delta flat">— 6 h 42 m total</span></div>
+        <div class="card"><div class="card-title">Distance (wk)</div><div class="metric">46.3<small>km</small></div><span class="delta up">▲ 12% vs last wk</span></div>
+        <div class="card"><div class="card-title">VO₂ max</div><div class="metric" style="color:var(--purple)" id="m-vo2card">51<small>ml/kg/min</small></div><span class="delta up" id="d-vo2card">▲ Excellent for age</span></div>
+      </div>
+
+      <div class="grid g23 mt">
+        <div class="card">
+          <div class="card-title">Training load — 4 weeks <span class="tag">acute vs chronic</span></div>
+          <div class="chart-wrap" style="height:240px"><canvas id="ch-load"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Intensity minutes — this week</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="ch-intensity"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="sec">Recent activities</h2>
+      <div class="card" style="padding:8px 14px">
+        <table id="tbl-activities">
+          <thead><tr><th>Activity</th><th>Date</th><th>Duration</th><th>Distance</th><th>Avg HR</th><th>Load</th><th>Effect</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ TAB: CALENDAR ============ -->
+    <section class="tab" id="tab-calendar">
+      <div class="grid g23">
+        <div class="card">
+          <div class="cal-head">
+            <span class="cal-month" id="cal-title">July 2026</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="pill" style="font-size:11px"><span class="dot"></span> Google Calendar · synced</span>
+              <span class="pill" style="font-size:11px"><span class="dot"></span> Garmin</span>
+              <div class="cal-nav"><button onclick="calNav(-1)">‹</button><button onclick="calNav(1)">›</button></div>
+            </div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="wk-chips" id="wk-chips"></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">Selected day <span class="tag" id="de-date">click a day</span></div>
+            <div id="de-list" style="margin-top:8px"></div>
+            <div class="form-row">
+              <label class="fld">Add session
+                <select id="de-src"></select></label>
+              <label class="fld">Custom title<input id="de-title" placeholder="only for custom"></label>
+            </div>
+            <div class="form-row" style="grid-template-columns:1fr 1fr">
+              <label class="fld">Type
+                <select id="de-type"><option value="run">Run</option><option value="gym">Gym</option><option value="hockey">Hockey</option><option value="ride">Ride</option><option value="swim">Swim</option><option value="rest">Rest day</option></select></label>
+              <label class="fld">Est. load<input id="de-load" type="number" value="80"></label>
+            </div>
+            <button class="btn primary" style="margin-top:12px" onclick="addCalEvent()">＋ Add to day</button>
+          </div>
+          <div class="card mt">
+            <div class="card-title">Training plans <span class="tag">apply to calendar</span></div>
+            <div id="plan-list"></div>
+            <div class="note">Garmin Coach plans adapt future sessions to your logged performance — full adaptivity arrives with the live Garmin link.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: RUNNING ============ -->
+    <section class="tab" id="tab-running">
+      <div class="grid g4">
+        <div class="card"><div class="card-title">This week</div><div class="metric">46.3<small>km</small></div><span class="delta up">▲ 12% vs last wk · 4 runs</span></div>
+        <div class="card"><div class="card-title">Avg pace (Z2)</div><div class="metric">5:05<small>/km</small></div><span class="delta up">▲ 9 s faster vs 4-wk avg</span></div>
+        <div class="card"><div class="card-title">Training status</div><div class="metric" style="color:var(--teal);font-size:24px;margin-top:8px">Productive</div><span class="delta up">▲ Fitness rising, fatigue in range</span></div>
+        <div class="card"><div class="card-title">Race predictor</div><div class="metric" style="font-size:22px;margin-top:6px">10K · 44:20</div><span class="delta flat">— 5K 21:15 · HM 1:38:40</span></div>
+      </div>
+
+      <div class="grid g23 mt">
+        <div class="card">
+          <div class="card-title">Weekly volume & aerobic efficiency — 12 weeks <span class="tag">pace falling + HR flat = fitness gains</span></div>
+          <div class="chart-wrap" style="height:260px"><canvas id="ch-runweeks"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Time in HR zones — 4 weeks</div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-runzones"></canvas></div>
+          <div style="font-size:11.5px;color:var(--text3);margin-top:10px">Target: ~80% low intensity (Z1–Z2). Current: <b style="color:var(--teal)">78%</b> — good polarisation.</div>
+        </div>
+      </div>
+
+      <h2 class="sec">Plan your runs</h2>
+      <div class="grid g23">
+        <div class="card">
+          <div class="card-title">Run planner <span class="tag">checks your current fatigue before planning</span></div>
+          <div class="form-row">
+            <label class="fld">Session type
+              <select id="pr-type">
+                <option value="easy">Easy run</option><option value="recovery">Recovery jog</option>
+                <option value="tempo">Tempo / threshold</option><option value="intervals" selected>Intervals / track</option>
+                <option value="long">Long run</option>
+              </select></label>
+            <label class="fld">Distance (km)<input id="pr-dist" type="number" value="10" min="3" max="42" step="0.5"></label>
+            <label class="fld">Day
+              <select id="pr-date"></select></label>
+            <label class="fld">Goal
+              <select id="pr-goal"><option>10K race prep</option><option>Base building</option><option>HM race prep</option><option>General fitness</option></select></label>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn primary" onclick="planRun()">＋ Plan this run</button>
+            <button class="btn" onclick="autoPlanWeek()">✨ Auto-plan my week</button>
+          </div>
+          <div id="planned-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Your training paces <span class="tag">from current VO₂ max 51</span></div>
+          <div class="kv"><span class="k">Recovery</span><span class="v">6:00–6:20 /km · &lt;125 bpm</span></div>
+          <div class="kv"><span class="k">Easy / Z2</span><span class="v">5:20–5:40 /km · 125–140</span></div>
+          <div class="kv"><span class="k">Marathon</span><span class="v">4:50–5:00 /km · 145–155</span></div>
+          <div class="kv"><span class="k">Threshold</span><span class="v" style="color:var(--orange)">4:25–4:35 /km · 158–166</span></div>
+          <div class="kv"><span class="k">VO₂ interval</span><span class="v" style="color:var(--red)">3:50–4:05 /km · 170+</span></div>
+          <div class="kv"><span class="k">Repetition</span><span class="v" style="color:var(--red)">3:35–3:45 /km · n/a</span></div>
+          <div class="note">Paces re-calibrate automatically after each race or threshold test.</div>
+        </div>
+      </div>
+
+      <div class="grid g2 mt">
+        <div class="card">
+          <div class="card-title">Load ramp — acute:chronic ratio <span class="tag">safe band 0.8–1.3</span></div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-acwr"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Running form — cadence & stride length</div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-cadence"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="sec">Recent runs</h2>
+      <div class="card" style="padding:8px 14px">
+        <table id="tbl-runs">
+          <thead><tr><th>Run</th><th>Date</th><th>Distance</th><th>Pace</th><th>Avg HR</th><th>Cadence</th><th>Elev</th><th>Load</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h2 class="sec">Running insights</h2>
+      <div class="grid g2" id="insights-running"></div>
+    </section>
+
+    <!-- ============ TAB: HOCKEY ============ -->
+    <section class="tab" id="tab-hockey">
+      <div class="grid g4">
+        <div class="card"><div class="card-title">Matches this season</div><div class="metric">14</div><span class="delta flat">— 2 this fortnight</span></div>
+        <div class="card"><div class="card-title">Avg match distance</div><div class="metric">6.8<small>km</small></div><span class="delta up">▲ 0.3 vs season avg</span></div>
+        <div class="card"><div class="card-title">Top speed</div><div class="metric">29.4<small>km/h</small></div><span class="delta up">▲ Season best · Sat 4 Jul</span></div>
+        <div class="card"><div class="card-title">Sprints / match</div><div class="metric">24</div><span class="delta up">▲ +3 vs season avg</span></div>
+      </div>
+
+      <div class="grid g23 mt">
+        <div class="card">
+          <div class="card-title">Match running profile — last 6 matches <span class="tag">distance by speed zone</span></div>
+          <div class="chart-wrap" style="height:260px"><canvas id="ch-hockeyzones"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Sprint output per match</div>
+          <div class="chart-wrap" style="height:260px"><canvas id="ch-hockeysprints"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g2 mt">
+        <div class="card">
+          <div class="card-title">1st vs 2nd half distance <span class="tag">drop-off analysis</span></div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-hockeyhalves"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Match HR zones — season avg</div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-hockeyhr"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g32 mt">
+        <div class="card">
+          <div class="card-title">Next match readiness <span class="tag">vs Rovers · Sat 11 Jul</span></div>
+          <div style="display:flex;align-items:center;gap:18px;margin-top:12px">
+            <div class="ring" id="ring-match" style="width:104px;height:104px"></div>
+            <div>
+              <div style="font-weight:700;font-size:15px;color:var(--orange)">Conditional — legs flagged</div>
+              <p style="font-size:12px;color:var(--text2);margin-top:4px">Aerobically ready, but quads (82%) & calves (74%) are still loaded from Monday's intervals. Projected to clear by Thursday evening.</p>
+            </div>
+          </div>
+          <div class="kv" style="margin-top:12px"><span class="k">Days since last match</span><span class="v">4</span></div>
+          <div class="kv"><span class="k">Last match recovery cost</span><span class="v">Load 171 · ~36 h</span></div>
+          <div class="kv"><span class="k">Recommendation</span><span class="v" style="color:var(--teal)">No leg work after Wed</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Repeat-sprint fatigue — sprint decrement per match <span class="tag">lower = better late-game speed</span></div>
+          <div class="chart-wrap" style="height:230px"><canvas id="ch-hockeydecr"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g2 mt">
+        <div class="card">
+          <div class="card-title">Explosive actions — accelerations vs decelerations</div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-hockeyaccel"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">High-intensity distance by quarter <span class="tag">last match</span></div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-hockeyquarters"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="sec">Match log</h2>
+      <div class="card" style="padding:8px 14px">
+        <table id="tbl-hockey">
+          <thead><tr><th>Match</th><th>Date</th><th>Result</th><th>Distance</th><th>Top speed</th><th>Sprints</th><th>HI distance</th><th>Load</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h2 class="sec">Hockey insights</h2>
+      <div class="grid g2" id="insights-hockey"></div>
+    </section>
+
+    <!-- ============ TAB: SLEEP ============ -->
+    <section class="tab" id="tab-sleep">
+      <div class="grid g4">
+        <div class="card"><div class="card-title">Sleep score</div><div class="metric" style="color:var(--purple)" id="m-sleepscore">82<small>/100</small></div><span class="delta up" id="d-sleepscore">▲ Good</span></div>
+        <div class="card"><div class="card-title">Duration</div><div class="metric" id="m-sleepdur">7<small>h</small> 24<small>m</small></div><span class="delta up" id="d-sleepdur">▲ 18 m vs avg</span></div>
+        <div class="card"><div class="card-title">Efficiency</div><div class="metric">91<small>%</small></div><span class="delta flat">— Awake 22 min</span></div>
+        <div class="card"><div class="card-title">Bed / wake</div><div class="metric" style="font-size:22px;margin-top:10px">23:12 → 06:58</div><span class="delta flat">— Consistent ±20 min</span></div>
+      </div>
+
+      <div class="grid g23 mt">
+        <div class="card">
+          <div class="card-title">Sleep stages — last 14 nights</div>
+          <div class="chart-wrap" style="height:250px"><canvas id="ch-sleepstack"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Last night</div>
+          <div class="stage-bar" id="stage-bar"></div>
+          <div style="margin-top:14px">
+            <div class="kv"><span class="k"><i class="lg-dot" style="background:var(--purple);display:inline-block;margin-right:8px"></i>Deep</span><span class="v">1 h 26 m · 19%</span></div>
+            <div class="kv"><span class="k"><i class="lg-dot" style="background:var(--blue);display:inline-block;margin-right:8px"></i>Light</span><span class="v">3 h 58 m · 54%</span></div>
+            <div class="kv"><span class="k"><i class="lg-dot" style="background:var(--cyan);display:inline-block;margin-right:8px"></i>REM</span><span class="v">1 h 38 m · 22%</span></div>
+            <div class="kv"><span class="k"><i class="lg-dot" style="background:var(--text3);display:inline-block;margin-right:8px"></i>Awake</span><span class="v">22 m · 5%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g2 mt">
+        <div class="card">
+          <div class="card-title">Sleep score trend — 30 days</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="ch-sleepscore"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Overnight physiology</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="ch-overnight"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: RECOVERY ============ -->
+    <section class="tab" id="tab-recovery">
+      <div class="grid g32">
+        <div class="card">
+          <div class="card-title">Recovery status</div>
+          <div style="display:flex;align-items:center;gap:20px;margin-top:10px">
+            <div class="ring" id="ring-recovery" style="width:130px;height:130px"></div>
+            <div>
+              <div style="font-size:17px;font-weight:800;color:var(--teal)">Ready to train</div>
+              <p style="font-size:12.5px;color:var(--text2);margin-top:5px">HRV stable, RHR below average and sleep debt cleared. Suited to a moderate–hard session today.</p>
+              <div style="margin-top:10px"><span class="badge low">Full recovery in ~9 h</span></div>
+            </div>
+          </div>
+          <div class="kv" style="margin-top:16px"><span class="k">Sleep debt (7 d)</span><span class="v" style="color:var(--green)">−0.4 h</span></div>
+          <div class="kv"><span class="k">Training strain (yest.)</span><span class="v">High · 142 load</span></div>
+          <div class="kv"><span class="k">Stress balance</span><span class="v">Recovery > stress ✓</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">HRV — 30 days vs baseline band</div>
+          <div class="chart-wrap" style="height:270px"><canvas id="ch-hrv30"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g2 mt">
+        <div class="card">
+          <div class="card-title">Resting heart rate — 30 days</div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-rhr30"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Stress vs recovery — this week</div>
+          <div class="chart-wrap" style="height:210px"><canvas id="ch-stress"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="sec">Recovery insights</h2>
+      <div class="grid g2" id="insights-recovery"></div>
+    </section>
+
+    <!-- ============ TAB: MUSCLE LOAD ============ -->
+    <section class="tab" id="tab-training">
+      <div class="card">
+        <div class="card-title">Muscle fatigue map <span class="tag">estimated from last 7 days of training</span></div>
+        <div class="m-legend">
+          <span class="lg"><i class="lg-dot" style="background:#a6fb99"></i>Recovered (&lt;25%)</span>
+          <span class="lg"><i class="lg-dot" style="background:#f2e86d"></i>Light fatigue (25–50%)</span>
+          <span class="lg"><i class="lg-dot" style="background:#ffc966"></i>Moderate (50–75%)</span>
+          <span class="lg"><i class="lg-dot" style="background:#ff6e66"></i>High (&gt;75%)</span>
+        </div>
+        <div class="muscle-wrap">
+          <div class="body-figs">
+            <div class="body-fig">
+              <svg width="185" height="437" viewBox="0 0 220 520" id="body-front">
+                <defs>
+                  <radialGradient id="hgF" cx="50%" cy="45%" r="60%">
+                    <stop offset="0%" stop-color="#0c2233" stop-opacity=".95"/><stop offset="70%" stop-color="#0c1c2b" stop-opacity=".55"/><stop offset="100%" stop-color="#0c1c2b" stop-opacity="0"/>
+                  </radialGradient>
+                  <filter id="glowF" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  <filter id="glow2F" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  <path id="f2-arm" d="M76,82 Q56,88 52,106 Q48,132 46,158 Q42,186 38,214 Q36,228 38,238 L34,248 Q32,262 40,268 Q46,272 50,264 Q56,252 52,240 L54,232 Q60,200 64,170 Q68,140 72,116 L74,112 Q71,96 70,88 Q74,84 76,82 Z"/>
+                  <path id="f2-leg" d="M80,214 Q72,248 71,285 Q70,320 78,348 Q73,378 75,410 Q77,442 83,466 L80,476 Q80,486 90,486 L103,486 Q108,482 104,474 L101,466 Q104,436 102,404 Q101,378 98,358 Q104,338 105,310 Q107,282 108,262 L110,260 Q98,254 90,248 Q82,238 80,214 Z"/>
+                  <path id="f2-trap" d="M96,66 Q90,70 82,76 L96,80 Q102,76 103,68 Z"/>
+                  <path id="f2-delt" d="M76,80 Q58,86 54,104 Q53,116 60,120 Q70,120 75,108 Q78,94 76,80 Z"/>
+                  <path id="f2-pec" d="M109,80 L85,82 Q76,94 78,108 Q82,124 100,130 Q109,132 109,122 Z"/>
+                  <path id="f2-bic" d="M60,124 Q54,144 56,166 Q58,178 65,180 Q72,172 72,150 Q72,132 68,122 Q63,116 60,124 Z"/>
+                  <path id="f2-fore" d="M54,184 Q46,208 42,230 Q41,240 47,242 Q55,238 58,216 Q61,196 60,186 Q57,178 54,184 Z"/>
+                  <path id="f2-abs" d="M108,136 L94,138 Q90,164 92,190 Q96,216 108,226 Z"/>
+                  <path id="f2-obl" d="M92,140 Q84,156 85,178 Q87,198 92,208 Q94,182 93,162 Q94,148 92,140 Z"/>
+                  <path id="f2-vl" d="M78,222 Q70,258 72,296 Q73,324 79,338 Q86,332 85,300 Q84,258 86,226 Q82,216 78,222 Z"/>
+                  <path id="f2-rf" d="M88,224 Q83,262 85,300 Q88,328 95,334 Q101,318 100,280 Q99,246 96,224 Q91,214 88,224 Z"/>
+                  <path id="f2-vm" d="M100,292 Q96,316 99,338 Q105,346 109,334 Q110,312 106,294 Q102,284 100,292 Z"/>
+                  <path id="f2-add" d="M100,252 Q97,268 98,284 Q101,292 106,288 Q108,270 107,254 Q103,244 100,252 Z"/>
+                  <path id="f2-tib" d="M84,362 Q79,398 82,432 Q85,448 91,442 Q94,406 92,370 Q88,354 84,362 Z"/>
+                  <path id="f2-cal" d="M97,366 Q102,394 100,424 Q98,434 95,426 Q92,398 93,372 Q94,358 97,366 Z"/>
+                </defs>
+                <ellipse cx="110" cy="255" rx="105" ry="255" fill="url(#hgF)"/>
+                <g fill="rgba(24,60,96,.30)" stroke="#3ec6ff" stroke-width="1.3" filter="url(#glowF)" pointer-events="none">
+                  <path d="M110,14 C98,14 91,23 91,34 C91,43 95,51 102,55 L102,62 Q100,68 94,72 L126,72 Q120,68 118,62 L118,55 C125,51 129,43 129,34 C129,23 122,14 110,14 Z"/>
+                  <path d="M96,74 L124,74 Q136,76 144,82 L150,88 Q148,104 146,112 Q140,128 138,148 Q137,166 134,172 Q138,196 140,214 Q140,236 132,248 Q124,256 110,260 Q96,256 88,248 Q80,236 80,214 Q82,196 86,172 Q83,166 82,148 Q80,128 74,112 Q72,104 70,88 L76,82 Q84,76 96,74 Z"/>
+                  <use href="#f2-arm"/><use href="#f2-arm" transform="translate(220,0) scale(-1,1)"/>
+                  <use href="#f2-leg"/><use href="#f2-leg" transform="translate(220,0) scale(-1,1)"/>
+                </g>
+                <g stroke="#3ec6ff" stroke-width=".7" opacity=".22" fill="none" pointer-events="none">
+                  <path d="M78,100 Q110,112 142,100"/><path d="M84,150 Q110,158 136,150"/>
+                  <path d="M86,170 Q110,178 134,170"/><path d="M82,238 Q110,248 138,238"/>
+                  <path d="M74,290 Q88,296 104,290 M116,290 Q132,296 146,290"/>
+                  <path d="M80,400 Q90,405 100,400 M120,400 Q130,405 140,400"/>
+                  <path d="M56,140 Q64,144 70,140 M150,140 Q156,144 164,140"/>
+                  <circle cx="89" cy="348" r="6"/><circle cx="131" cy="348" r="6"/>
+                </g>
+                <g filter="url(#glow2F)" stroke-width="1.1">
+                  <g class="muscle" data-m="traps"><use href="#f2-trap"/><use href="#f2-trap" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="shoulders"><use href="#f2-delt"/><use href="#f2-delt" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="chest"><use href="#f2-pec"/><use href="#f2-pec" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="biceps"><use href="#f2-bic"/><use href="#f2-bic" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="forearms"><use href="#f2-fore"/><use href="#f2-fore" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="core"><use href="#f2-abs"/><use href="#f2-abs" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="obliques"><use href="#f2-obl"/><use href="#f2-obl" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="quads"><use href="#f2-vl"/><use href="#f2-rf"/><use href="#f2-vm"/><use href="#f2-vl" transform="translate(220,0) scale(-1,1)"/><use href="#f2-rf" transform="translate(220,0) scale(-1,1)"/><use href="#f2-vm" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="adductors"><use href="#f2-add"/><use href="#f2-add" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="tibialis"><use href="#f2-tib"/><use href="#f2-tib" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="calves"><use href="#f2-cal"/><use href="#f2-cal" transform="translate(220,0) scale(-1,1)"/></g>
+                </g>
+                <g stroke="#3ec6ff" stroke-width=".8" opacity=".35" pointer-events="none">
+                  <path d="M94,158 L108,159 M94,176 L108,178 M95,196 L108,198 M126,158 L112,159 M126,176 L112,178 M125,196 L112,198" fill="none"/>
+                </g>
+              </svg>
+              <div class="cap">Front (anterior)</div>
+            </div>
+            <div class="body-fig">
+              <svg width="185" height="437" viewBox="0 0 220 520" id="body-back">
+                <defs>
+                  <radialGradient id="hgB" cx="50%" cy="45%" r="60%">
+                    <stop offset="0%" stop-color="#0c2233" stop-opacity=".95"/><stop offset="70%" stop-color="#0c1c2b" stop-opacity=".55"/><stop offset="100%" stop-color="#0c1c2b" stop-opacity="0"/>
+                  </radialGradient>
+                  <filter id="glowB" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  <filter id="glow2B" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  <path id="b2-arm" d="M76,82 Q56,88 52,106 Q48,132 46,158 Q42,186 38,214 Q36,228 38,238 L34,248 Q32,262 40,268 Q46,272 50,264 Q56,252 52,240 L54,232 Q60,200 64,170 Q68,140 72,116 L74,112 Q71,96 70,88 Q74,84 76,82 Z"/>
+                  <path id="b2-leg" d="M80,214 Q72,248 71,285 Q70,320 78,348 Q73,378 75,410 Q77,442 83,466 L80,476 Q80,486 90,486 L103,486 Q108,482 104,474 L101,466 Q104,436 102,404 Q101,378 98,358 Q104,338 105,310 Q107,282 108,262 L110,260 Q98,254 90,248 Q82,238 80,214 Z"/>
+                  <path id="b2-trap" d="M109,66 Q98,70 88,78 Q83,82 84,86 Q96,90 102,100 Q107,112 108,132 L109,138 Z"/>
+                  <path id="b2-delt" d="M76,80 Q58,86 54,104 Q53,116 60,120 Q70,120 75,108 Q78,94 76,80 Z"/>
+                  <path id="b2-infra" d="M92,104 Q84,110 85,122 Q92,128 100,124 Q100,112 97,104 Q94,100 92,104 Z"/>
+                  <path id="b2-lat" d="M87,124 Q80,144 84,166 Q94,186 108,194 L108,142 Q96,132 87,124 Z"/>
+                  <path id="b2-tri" d="M60,126 Q53,148 55,170 Q58,182 64,180 Q70,168 70,148 Q71,132 67,124 Q62,118 60,126 Z"/>
+                  <path id="b2-fore" d="M54,184 Q46,208 42,230 Q41,240 47,242 Q55,238 58,216 Q61,196 60,186 Q57,178 54,184 Z"/>
+                  <path id="b2-erec" d="M103,168 Q100,196 103,220 Q106,230 109,230 L109,168 Q106,162 103,168 Z"/>
+                  <path id="b2-glute" d="M109,234 Q88,232 83,250 Q80,270 92,280 Q106,284 109,270 Z"/>
+                  <path id="b2-hamO" d="M81,288 Q76,318 79,350 Q83,362 89,356 Q91,324 89,296 Q85,280 81,288 Z"/>
+                  <path id="b2-hamI" d="M95,290 Q91,320 94,352 Q99,360 103,350 Q104,318 101,294 Q97,280 95,290 Z"/>
+                  <path id="b2-gasO" d="M83,372 Q78,398 82,424 Q87,436 92,428 Q94,402 92,378 Q87,362 83,372 Z"/>
+                  <path id="b2-gasI" d="M96,374 Q101,398 98,424 Q95,432 94,424 Q92,400 94,378 Q95,366 96,374 Z"/>
+                  <path id="b2-sol" d="M87,438 Q85,452 87,466 L92,466 Q93,451 92,439 Z"/>
+                </defs>
+                <ellipse cx="110" cy="255" rx="105" ry="255" fill="url(#hgB)"/>
+                <g fill="rgba(24,60,96,.30)" stroke="#3ec6ff" stroke-width="1.3" filter="url(#glowB)" pointer-events="none">
+                  <path d="M110,14 C98,14 91,23 91,34 C91,43 95,51 102,55 L102,62 Q100,68 94,72 L126,72 Q120,68 118,62 L118,55 C125,51 129,43 129,34 C129,23 122,14 110,14 Z"/>
+                  <path d="M96,74 L124,74 Q136,76 144,82 L150,88 Q148,104 146,112 Q140,128 138,148 Q137,166 134,172 Q138,196 140,214 Q140,236 132,248 Q124,256 110,260 Q96,256 88,248 Q80,236 80,214 Q82,196 86,172 Q83,166 82,148 Q80,128 74,112 Q72,104 70,88 L76,82 Q84,76 96,74 Z"/>
+                  <use href="#b2-arm"/><use href="#b2-arm" transform="translate(220,0) scale(-1,1)"/>
+                  <use href="#b2-leg"/><use href="#b2-leg" transform="translate(220,0) scale(-1,1)"/>
+                </g>
+                <g stroke="#3ec6ff" stroke-width=".7" opacity=".22" fill="none" pointer-events="none">
+                  <path d="M110,80 L110,232 M96,96 Q90,106 92,118 M124,96 Q130,106 128,118"/>
+                  <path d="M82,238 Q110,248 138,238"/>
+                  <path d="M74,290 Q88,296 104,290 M116,290 Q132,296 146,290"/>
+                  <path d="M80,400 Q90,405 100,400 M120,400 Q130,405 140,400"/>
+                  <circle cx="89" cy="352" r="5"/><circle cx="131" cy="352" r="5"/>
+                </g>
+                <g filter="url(#glow2B)" stroke-width="1.1">
+                  <g class="muscle" data-m="traps"><use href="#b2-trap"/><use href="#b2-trap" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="shoulders"><use href="#b2-delt"/><use href="#b2-delt" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="lats"><use href="#b2-infra"/><use href="#b2-lat"/><use href="#b2-infra" transform="translate(220,0) scale(-1,1)"/><use href="#b2-lat" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="triceps"><use href="#b2-tri"/><use href="#b2-tri" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="forearms"><use href="#b2-fore"/><use href="#b2-fore" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="lowerback"><use href="#b2-erec"/><use href="#b2-erec" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="glutes"><use href="#b2-glute"/><use href="#b2-glute" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="hamstrings"><use href="#b2-hamO"/><use href="#b2-hamI"/><use href="#b2-hamO" transform="translate(220,0) scale(-1,1)"/><use href="#b2-hamI" transform="translate(220,0) scale(-1,1)"/></g>
+                  <g class="muscle" data-m="calves"><use href="#b2-gasO"/><use href="#b2-gasI"/><use href="#b2-sol"/><use href="#b2-gasO" transform="translate(220,0) scale(-1,1)"/><use href="#b2-gasI" transform="translate(220,0) scale(-1,1)"/><use href="#b2-sol" transform="translate(220,0) scale(-1,1)"/></g>
+                </g>
+              </svg>
+              <div class="cap">Back (posterior)</div>
+            </div>
+          </div>
+          <div class="m-list" id="m-list"></div>
+        </div>
+      </div>
+
+      <div class="grid g2 mt">
+        <div class="card">
+          <div class="card-title">Muscle group load — last 7 days <span class="tag">hover a bar to locate it on the model</span></div>
+          <div class="chart-wrap" style="height:400px"><canvas id="ch-muscleload"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Suggested focus</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px" id="insights-training"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: GYM SESSIONS ============ -->
+    <section class="tab" id="tab-gym">
+      <div class="grid g4">
+        <div class="card"><div class="card-title">Sessions this week</div><div class="metric">3</div><span class="delta flat">— Lower · Push · Upload pending</span></div>
+        <div class="card"><div class="card-title">Weekly volume</div><div class="metric">24.7<small>t</small></div><span class="delta up">▲ 8% vs 4-wk avg</span></div>
+        <div class="card"><div class="card-title">Avg session strain</div><div class="metric" style="color:var(--orange)">Mod</div><span class="delta flat">— Load 78–96 per session</span></div>
+        <div class="card"><div class="card-title">Recovery debt</div><div class="metric">~18<small>h</small></div><span class="delta down">▲ Driven by quads & calves</span></div>
+      </div>
+
+      <div class="grid g23 mt">
+        <div class="card">
+          <div class="card-title">Upload a workout <span class="tag">paste sets or upload a file</span></div>
+          <p style="font-size:12px;color:var(--text3);margin:8px 0 10px">Format: one exercise per line — <b style="color:var(--text2)">Exercise&nbsp; sets×reps&nbsp; weight</b> (e.g. “Back Squat 5x5 100kg”). Bodyweight moves can omit the weight.</p>
+          <textarea class="ta" id="gym-input">Back Squat 5x5 100kg
+Romanian Deadlift 3x8 90kg
+Walking Lunges 3x12 20kg
+Leg Curl 3x10 45kg
+Standing Calf Raise 4x15 60kg
+Plank 3x1 </textarea>
+          <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+            <button class="btn primary" onclick="analyzeSession()">⚡ Analyse session</button>
+            <button class="btn" onclick="document.getElementById('gym-file').click()">📄 Upload file</button>
+            <input type="file" id="gym-file" accept=".txt,.csv" hidden>
+            <label class="fld" style="max-width:170px">Session date<input id="gym-date" type="date"></label>
+            <span style="font-size:11.5px;color:var(--text3)">.txt / .csv — saved on this device; feeds the muscle model</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Weekly gym tonnage — 8 weeks</div>
+          <div class="chart-wrap" style="height:250px"><canvas id="ch-gymvol"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card mt" id="gym-result" style="display:none">
+        <div class="card-title">Session impact assessment <span class="tag" id="gr-date"></span></div>
+        <div class="sum-grid">
+          <div class="sum-cell"><div class="s-k">Total volume</div><div class="s-v" id="gr-vol">—</div></div>
+          <div class="sum-cell"><div class="s-k">Load score</div><div class="s-v" id="gr-load" style="color:var(--teal)">—</div></div>
+          <div class="sum-cell"><div class="s-k">Strain</div><div class="s-v" id="gr-strain">—</div></div>
+          <div class="sum-cell"><div class="s-k">Readiness impact</div><div class="s-v" id="gr-ready" style="color:var(--orange)">—</div></div>
+        </div>
+        <div class="grid g2">
+          <div>
+            <div class="card-title" style="margin-bottom:8px">Muscle impact <span class="tag">hover to locate on model</span></div>
+            <div id="gr-bars"></div>
+          </div>
+          <div>
+            <div class="card-title" style="margin-bottom:8px">Assessment</div>
+            <div id="gr-notes" style="display:flex;flex-direction:column;gap:10px"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn primary" onclick="applySession()">✓ Apply to fatigue model</button>
+          <button class="btn" onclick="document.getElementById('gym-result').style.display='none'">Discard</button>
+          <span style="font-size:11.5px;color:var(--text3);align-self:center">Applying updates the Muscle Load tab &amp; recovery estimates</span>
+        </div>
+      </div>
+
+      <h2 class="sec">Past uploaded sessions</h2>
+      <div class="card" style="padding:8px 14px">
+        <table id="tbl-gym">
+          <thead><tr><th>Session</th><th>Date</th><th>Volume</th><th>Load</th><th>Top muscles</th><th>Strain</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ TAB: LIBRARY ============ -->
+    <section class="tab" id="tab-library">
+      <h2 class="sec" style="margin-top:0">My sessions</h2>
+      <div class="grid g3" id="lib-sessions"></div>
+
+      <div class="card mt">
+        <div class="card-title">Create a new session</div>
+        <div class="form-row">
+          <label class="fld">Name<input id="ls-name" placeholder="e.g. Hill repeats 8×60s"></label>
+          <label class="fld">Sport
+            <select id="ls-sport"><option value="run">Run</option><option value="gym">Gym</option><option value="hockey">Hockey</option><option value="ride">Ride</option><option value="swim">Swim</option></select></label>
+          <label class="fld">Duration (min)<input id="ls-dur" type="number" value="60"></label>
+          <label class="fld">Est. load<input id="ls-load" type="number" value="90"></label>
+          <label class="fld">Focus<input id="ls-focus" placeholder="e.g. VO₂ max"></label>
+        </div>
+        <button class="btn primary" style="margin-top:12px" onclick="addLibSession()">＋ Save to library</button>
+      </div>
+
+      <h2 class="sec">Programs & plans</h2>
+      <div class="grid g2" id="lib-programs"></div>
+    </section>
+
+    <!-- ============ TAB: TESTING & BODY ============ -->
+    <section class="tab" id="tab-testing">
+      <div class="grid g4">
+        <div class="card"><div class="card-title">Weight <span class="t-ic">⚖️</span></div><div class="metric" id="tc-weight">73.7<small>kg</small></div><span class="delta up">▼ 1.0 kg vs Mar 24 · lean mass held</span></div>
+        <div class="card"><div class="card-title">Body fat <span class="t-ic">📏</span></div><div class="metric" id="tc-bf">6.36<small>%</small></div><span class="delta up">— Mar 25 · athletic range throughout</span></div>
+        <div class="card"><div class="card-title">Back squat 1RM <span class="t-ic">🏋️</span></div><div class="metric" id="tc-squat">139.8<small>kg</small></div><span class="delta up">▲ +18.8 kg vs Mar 24 — big strength PR</span></div>
+        <div class="card"><div class="card-title">RSA fatigue index <span class="t-ic">⚡</span></div><div class="metric" id="tc-rsa">2.01<small>%</small></div><span class="delta up">▼ from 4.04 — repeatability restored</span></div>
+      </div>
+
+      <div class="grid g23 mt">
+        <div class="card">
+          <div class="card-title">Log a result <span class="tag">manual entry or file upload</span></div>
+          <div class="form-row">
+            <label class="fld">Category
+              <select id="ts-cat" onchange="fillMetrics()"></select></label>
+            <label class="fld">Metric
+              <select id="ts-metric"></select></label>
+            <label class="fld">Value<input id="ts-value" type="number" step="0.1" placeholder="e.g. 76.2"></label>
+            <label class="fld">Date<input id="ts-date" type="date" value="2026-07-08"></label>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
+            <button class="btn primary" onclick="addTest()">＋ Log result</button>
+            <button class="btn" onclick="document.getElementById('ts-file').click()">📄 Upload CSV</button>
+            <input type="file" id="ts-file" accept=".csv,.txt" hidden>
+            <span style="font-size:11.5px;color:var(--text3)">CSV format: date, metric, value</span>
+          </div>
+          <div class="note">New entries update the charts, summary cards and history below immediately (stored in-session for the demo — persistent storage arrives with live sync).</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Body composition — SSISA testing history</div>
+          <div class="chart-wrap" style="height:230px"><canvas id="ch-bodycomp"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid g3 mt">
+        <div class="card">
+          <div class="card-title">Strength — 1RM progression</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="ch-1rm"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Power & speed tests</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="ch-power"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Skinfolds & repeat-sprint ability</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="ch-skin"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="sec">Testing history</h2>
+      <div class="card" style="padding:8px 14px">
+        <table id="tbl-tests">
+          <thead><tr><th>Date</th><th>Category</th><th>Metric</th><th>Value</th><th>Change</th><th>Source</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ TAB: TRENDS ============ -->
+    <section class="tab" id="tab-trends">
+      <div class="grid g4">
+        <div class="card"><div class="card-title">Fitness (CTL)</div><div class="metric">68</div><span class="delta up">▲ +9 in 8 weeks</span></div>
+        <div class="card"><div class="card-title">VO₂ max trend</div><div class="metric">51</div><span class="delta up">▲ +2 in 6 months</span></div>
+        <div class="card"><div class="card-title">Weight</div><div class="metric">76.4<small>kg</small></div><span class="delta up">▼ 1.8 kg in 6 mo</span></div>
+        <div class="card"><div class="card-title">Avg sleep score</div><div class="metric">79</div><span class="delta up">▲ +4 vs last quarter</span></div>
+      </div>
+      <div class="grid g2 mt">
+        <div class="card">
+          <div class="card-title">VO₂ max — 6 months</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="ch-vo2"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Weight & body fat — 6 months</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="ch-weight"></canvas></div>
+        </div>
+      </div>
+      <div class="grid g23 mt">
+        <div class="card">
+          <div class="card-title">Monthly training volume by sport</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="ch-volume"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Personal records <span class="tag">last 12 months</span></div>
+          <div style="margin-top:6px">
+            <div class="kv"><span class="k">5K run</span><span class="v">21:38 <span style="color:var(--teal);font-size:11px">Apr 26</span></span></div>
+            <div class="kv"><span class="k">10K run</span><span class="v">45:12 <span style="color:var(--teal);font-size:11px">May 26</span></span></div>
+            <div class="kv"><span class="k">Half marathon</span><span class="v">1:42:55 <span style="color:var(--teal);font-size:11px">Mar 26</span></span></div>
+            <div class="kv"><span class="k">FTP (bike)</span><span class="v">248 W <span style="color:var(--teal);font-size:11px">Jun 26</span></span></div>
+            <div class="kv"><span class="k">Longest ride</span><span class="v">94.6 km <span style="color:var(--teal);font-size:11px">Jun 26</span></span></div>
+            <div class="kv"><span class="k">Trap bar 1RM</span><span class="v">177.4 kg <span style="color:var(--teal);font-size:11px">Mar 25</span></span></div>
+            <div class="kv"><span class="k">Back squat 1RM</span><span class="v">139.8 kg <span style="color:var(--teal);font-size:11px">Mar 25</span></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: LOG ============ -->
+    <section class="tab" id="tab-log">
+      <div class="note" id="log-offline" style="display:none;margin-bottom:16px">Logging is <b>read-only</b> right now — this page isn't talking to the local server. Run <b>python3 garmin_server.py</b> and open <b>http://localhost:8765/pulse-dashboard.html</b> to write water &amp; weight to Garmin and save check-ins.</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">💧 Water <span class="tag">writes to Garmin</span></div>
+          <div class="metric" id="log-water">—<small id="log-water-goal"> / 2500 ml</small></div>
+          <div class="water-bar"><i id="log-water-fill" style="width:0%"></i></div>
+          <div class="logrow">
+            <button class="btn primary" data-water="250">+250 ml</button>
+            <button class="btn primary" data-water="500">+500 ml</button>
+            <input type="number" id="log-water-custom" class="log-in" placeholder="ml" style="width:90px">
+            <button class="btn" id="log-water-add">Add</button>
+            <span class="log-saved" id="log-water-saved"></span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">⚖️ Weight <span class="tag">writes to Garmin</span></div>
+          <div class="metric" id="log-kg-now">—<small>kg</small></div>
+          <div class="logrow">
+            <input type="number" step="0.1" id="log-kg" class="log-in" style="width:110px" placeholder="kg">
+            <span style="color:var(--text3);font-size:12px">baseline <span id="log-kg-base">—</span> kg</span>
+            <button class="btn primary" id="log-kg-save" style="margin-left:auto">Save weigh-in</button>
+            <span class="log-saved" id="log-kg-saved"></span>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="card-title">📝 Daily check-in <span class="tag">saved locally — feeds verdict &amp; muscle model</span></div>
+        <div class="log-lab">Session effort (RPE 1–10)</div><div class="seg" data-seg="rpe" data-n="10"></div>
+        <div class="log-lab">Muscle soreness (1 fresh → 5 wrecked)</div><div class="seg" data-seg="soreness" data-n="5"></div>
+        <div class="log-lab">How sleep felt (1 poor → 5 great)</div><div class="seg" data-seg="sleepQuality" data-n="5"></div>
+        <div class="log-lab">Mood / motivation (1 low → 5 high)</div><div class="seg" data-seg="mood" data-n="5"></div>
+        <div class="log-lab">Alcohol (drinks)</div><input type="number" id="log-alc" min="0" value="0" class="log-in" style="width:90px">
+        <div class="log-lab">Notes</div><textarea id="log-notes" class="log-in" style="width:100%;min-height:64px;resize:vertical" placeholder="e.g. right calf tight after the long run"></textarea>
+        <div class="logrow"><button class="btn primary" id="log-save">Save check-in</button><span class="log-saved" id="log-saved"></span></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: DATA SYNC ============ -->
+    <section class="tab" id="tab-sync">
+      <div class="grid g3">
+        <div class="conn">
+          <div class="c-ic" style="background:rgba(121,226,215,.14);color:var(--teal)">G</div>
+          <div class="c-body">
+            <div class="c-name">Garmin Connect</div>
+            <div class="c-sub"><span style="color:var(--green)">● Connected</span> · via garmin_sync.py + cached token</div>
+          </div>
+          <button class="btn" onclick="toast('Refresh: run garmin_sync.py in the Health & Fitness folder (or start garmin_server.py and use Pull latest)')">Refresh</button>
+        </div>
+        <div class="conn">
+          <div class="c-ic" style="background:rgba(255,110,102,.12);color:var(--red)">♥</div>
+          <div class="c-body">
+            <div class="c-name">Apple Health</div>
+            <div class="c-sub">Secondary source · Garmin wins on overlap</div>
+          </div>
+          <button class="btn primary" onclick="toast('Export from iPhone: Health app → profile → Export All Health Data, then hand the zip to Claude to merge')">Import</button>
+        </div>
+        <div class="conn">
+          <div class="c-ic" style="background:rgba(255,201,102,.14);color:var(--orange)">S</div>
+          <div class="c-body">
+            <div class="c-name">Strava</div>
+            <div class="c-sub">Not connected · phase 2</div>
+          </div>
+          <button class="btn primary" onclick="toast('Placeholder — live integration comes after design sign-off')">Connect</button>
+        </div>
+      </div>
+
+      <div class="grid g23 mt">
+        <div class="card" style="padding:8px 14px">
+          <div class="card-title" style="padding:12px 10px 4px">Sync history</div>
+          <table>
+            <thead><tr><th>Source</th><th>Type</th><th>When</th><th>Items</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Garmin</td><td>Auto sync</td><td>Today 07:48</td><td>Sleep, HRV, 1 activity</td><td><span class="badge low">Success</span></td></tr>
+              <tr><td>Garmin</td><td>Auto sync</td><td>Yesterday 21:15</td><td>Daily metrics</td><td><span class="badge low">Success</span></td></tr>
+              <tr><td>Garmin</td><td>Manual</td><td>Yesterday 18:02</td><td>Interval run 10.2 km</td><td><span class="badge low">Success</span></td></tr>
+              <tr><td>Garmin</td><td>Auto sync</td><td>5 Jul 07:52</td><td>Sleep, HRV</td><td><span class="badge low">Success</span></td></tr>
+              <tr><td>Garmin</td><td>Auto sync</td><td>4 Jul 08:10</td><td>Daily metrics</td><td><span class="badge mod">Partial</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Sync preferences</div>
+          <div class="kv"><span class="k">Auto sync</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="kv"><span class="k">Sync activities</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="kv"><span class="k">Sync sleep & HRV</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="kv"><span class="k">Sync body composition</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+          <div class="note">Live pipeline: <b>garmin_sync.py</b> (cron on your Mac) writes <b>data.js</b>, which this dashboard reads on every refresh. Health, sleep, HRV, readiness, load and activities are real; muscle fatigue, hockey sprint detail and some weekly aggregates are still modelled until the next sync upgrade. Apple Health merges as a secondary source via export.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: SETTINGS ============ -->
+    <section class="tab" id="tab-settings">
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-title">Profile</div>
+          <div class="kv"><span class="k">Name</span><span class="v">Athlete</span></div>
+          <div class="kv"><span class="k">Age</span><span class="v">23 (15 Apr 2003)</span></div>
+          <div class="kv"><span class="k">Height</span><span class="v">179 cm</span></div>
+          <div class="kv"><span class="k">Weight</span><span class="v">73.7 kg (Mar 25 baseline)</span></div>
+          <div class="kv"><span class="k">Max HR</span><span class="v">192 bpm</span></div>
+          <div class="kv"><span class="k">Primary sports</span><span class="v">Hockey (midfield, WP) · Running · Strength</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Preferences</div>
+          <div class="kv"><span class="k">Units</span><span class="v">Metric (km, kg)</span></div>
+          <div class="kv"><span class="k">Week starts on</span><span class="v">Monday</span></div>
+          <div class="kv"><span class="k">Dark theme</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="kv"><span class="k">Morning readiness report</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="kv"><span class="k">Overtraining alerts</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="kv"><span class="k">Weekly summary email</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+        </div>
+      </div>
+      <div class="card mt">
+        <div class="card-title">Insight engine</div>
+        <div class="kv"><span class="k">Insight sensitivity</span><span class="v">Balanced</span></div>
+        <div class="kv"><span class="k">Muscle fatigue model</span><span class="v">v0.1 (heuristic, mock)</span></div>
+        <div class="kv"><span class="k">Use my feedback to tune insights</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="note">Settings on this page are non-functional placeholders for layout review.</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- app script arrives encrypted via app.enc -->
+
+
+
+<div id="lockscreen" style="position:fixed;inset:0;z-index:99999;background:#0c0d0d;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;font-family:'General Sans',system-ui,sans-serif;color:#e8efed">
+  <div style="font-size:34px">&#x1F512;</div>
+  <div style="font-size:20px;font-weight:600;letter-spacing:.3px">Pulse</div>
+  <div id="lock-msg" style="color:#9aa6a3;font-size:13px;max-width:280px;text-align:center">Enter your passphrase to decrypt your health data.</div>
+  <form id="lock-form" style="display:flex;gap:10px">
+    <input id="lock-pass" type="password" autocomplete="current-password" placeholder="Passphrase"
+      style="background:#161818;border:1px solid #242a29;border-radius:999px;padding:12px 18px;color:#e8efed;font-size:15px;outline:none;width:200px">
+    <button type="submit" style="background:#79E2D7;border:0;border-radius:999px;padding:12px 22px;font-weight:600;font-size:15px;cursor:pointer">Unlock</button>
+  </form>
+</div>
+<script>
+(function(){
+  const LS_KEY='pulse.passphrase', ENC='app.enc', enc=new TextEncoder(), dec=new TextDecoder();
+  const msg=t=>{document.getElementById('lock-msg').textContent=t;};
+
+  async function deriveKey(pass,salt){
+    const base=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},base,
+      {name:'AES-GCM',length:256},false,['decrypt']);
+  }
+
+  async function unlock(pass){
+    const r=await fetch(ENC,{cache:'no-store'});
+    if(!r.ok) throw Object.assign(new Error(),{nodata:true});
+    const b=new Uint8Array(await r.arrayBuffer());
+    if(dec.decode(b.slice(0,6))!=='PULSE1') throw Object.assign(new Error(),{nodata:true});
+    const key=await deriveKey(pass,b.slice(6,22));
+    const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(22,34)},key,b.slice(34,b.length));
+    const payload=JSON.parse(dec.decode(pt));
+    (0,eval)(payload.data);                                   // sets window.GARMIN_DATA
+    const s=document.createElement('script');                 // run the dashboard app
+    s.textContent=payload.main; document.body.appendChild(s);
+    const nm=window.GARMIN_DATA&&window.GARMIN_DATA.athlete&&window.GARMIN_DATA.athlete.name;
+    if(nm) document.querySelectorAll('.u-name, .kv .v').forEach(e=>{if(e.textContent==='Athlete')e.textContent=nm;});
+    try{localStorage.setItem(LS_KEY,pass);}catch(e){}
+    const lk=document.getElementById('lockscreen'); if(lk)lk.remove();
+  }
+
+  document.getElementById('lock-form').addEventListener('submit',async ev=>{
+    ev.preventDefault();
+    const p=document.getElementById('lock-pass').value; if(!p)return;
+    msg('Decrypting…');
+    try{ await unlock(p); }
+    catch(e){ msg(e.nodata?'No synced data yet — run the sync workflow once, then reload.':'Wrong passphrase — try again.'); }
+  });
+
+  window.addEventListener('load',async()=>{
+    if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
+    const saved=(()=>{try{return localStorage.getItem(LS_KEY);}catch(e){return null;}})();
+    if(saved){ try{ await unlock(saved); }catch(e){ try{localStorage.removeItem(LS_KEY);}catch(_){} msg(e.nodata?'No synced data yet — run the sync workflow once, then reload.':'Saved passphrase no longer works — enter it again.'); } }
+  });
+})();
+</script>
+
+</body>
+</html>

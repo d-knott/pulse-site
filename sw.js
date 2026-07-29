@@ -1,7 +1,7 @@
 /* Pulse service worker — network-first with cache fallback.
    Fresh data whenever online; the last good copy of everything
    (shell, Chart.js, fonts, app.enc) when offline. */
-const CACHE = 'pulse-v1';
+const CACHE = 'pulse-v2';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.webmanifest'])));

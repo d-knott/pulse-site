@@ -94,7 +94,7 @@ body{
 .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#1c1023}
 .sidebar-foot .u-name{font-weight:600;font-size:13px}
 .sidebar-foot .u-sub{font-size:11px;color:var(--text3)}
-.main{margin-left:228px;flex:1;padding:22px 28px 60px;max-width:1280px}
+.main{margin-left:228px;flex:1;min-width:0;padding:22px 28px 60px;max-width:1280px}
 
 /* ---------- Header ---------- */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
@@ -124,7 +124,7 @@ body{
 .card{
   background:linear-gradient(180deg,#161b1a 0%,#131716 100%);
   border:1px solid var(--border);border-radius:var(--radius);
-  padding:18px 20px;position:relative;box-shadow:var(--shadow);
+  padding:16px 18px;position:relative;box-shadow:var(--shadow);
 }
 .card::after{
   content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
@@ -143,7 +143,7 @@ section.tab{display:none;animation:fadeIn .25s ease}
 section.tab.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .mt{margin-top:14px}
-h2.sec{font-size:14px;font-weight:700;margin:26px 0 13px;display:flex;align-items:center;gap:10px;letter-spacing:.1px}
+h2.sec{font-size:14px;font-weight:700;margin:22px 0 12px;display:flex;align-items:center;gap:10px;letter-spacing:.1px}
 h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
 
 /* ---------- Rings / gauges ---------- */
@@ -419,6 +419,29 @@ tr.clickable:hover td{background:rgba(94,232,210,.045);cursor:pointer}
   .bs-it svg{width:19px;height:19px}
   .bs-it:active{border-color:var(--teal);color:var(--teal)}
 }
+
+/* ---------- V3.2 spacing & card-sizing fixes ---------- */
+/* grid/flex children may not force min-content overflow */
+.grid > .card{min-width:0}
+.hero > div{min-width:0}
+/* key/value rows: keep long values from crowding their label */
+.kv{gap:16px}
+.kv .k{flex:none}
+.kv .v{text-align:right;min-width:0}
+.lg-row{gap:14px}
+.lg-row .lg-v{text-align:right;max-width:62%}
+/* Today at-a-glance: tighter rows (overrides the runtime-injected styles) */
+#tab-today .glance-row{padding:8px 6px;gap:11px}
+#tab-today .glance-row .gt{width:80px;font-size:12.5px}
+#tab-today .card.hero{padding:18px 22px;gap:20px}
+/* KPI stat cards: sparkline pinned to the bottom, no floating dead space */
+.grid.g4 > .card{display:flex;flex-direction:column}
+.grid.g4 > .card .spark{margin-top:auto}
+/* paired chart rows: equal card heights, charts absorb the difference */
+#tab-today .grid.g2 > .card{display:flex;flex-direction:column}
+#tab-today .grid.g2 > .card .chart-wrap{flex:1;min-height:150px}
+/* very wide screens: use the room */
+@media(min-width:1680px){.main{max-width:1500px}}
 
 /* ---------- Responsive ---------- */
 @media(max-width:1080px){

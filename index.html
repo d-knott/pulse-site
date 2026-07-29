@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <meta name="robots" content="noindex, nofollow">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pulse — Health & Training Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
@@ -252,11 +252,43 @@
   /* ---------- Responsive ---------- */
   @media(max-width:1080px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}.g23,.g32{grid-template-columns:1fr}}
   @media(max-width:760px){
-    .sidebar{width:100%;height:auto;position:sticky;flex-direction:row;align-items:center;padding:10px;bottom:auto;overflow-x:auto}
-    .nav{flex-direction:row}.nav-item span{display:none}.nav-sep,.sidebar-foot,.logo-name{display:none}
-    .main{margin-left:0;padding:16px}
-    .g4,.g3,.g2{grid-template-columns:1fr}
+    /* bottom tab bar (iOS-style), scrollable when tabs overflow */
+    .sidebar{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;height:auto;
+      flex-direction:row;align-items:center;padding:4px 6px calc(4px + env(safe-area-inset-bottom));
+      border-right:0;border-top:1px solid var(--border);overflow-x:auto;overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;scrollbar-width:none;background:rgba(14,16,16,.96);backdrop-filter:blur(14px)}
+    .sidebar::-webkit-scrollbar{display:none}
+    .nav{flex-direction:row;gap:0;flex:none}
+    .nav-item{flex-direction:column;gap:3px;padding:7px 9px;min-width:62px;flex:none;border-radius:12px}
+    .nav-item span{display:block;font-size:9px;white-space:nowrap}
+    .nav-item svg{width:19px;height:19px}
+    .nav-sep,.sidebar-foot,.logo{display:none}
+    .main{margin-left:0;padding:14px 13px calc(86px + env(safe-area-inset-bottom));max-width:100%}
+    .header h1{font-size:20px}
+    /* grids: small stat cards 2-up, charts full width */
+    .g4{grid-template-columns:1fr 1fr}
+    .g3,.g2,.g23,.g32{grid-template-columns:1fr}
+    .metric{font-size:26px}
+    .form-row{grid-template-columns:1fr 1fr !important}
+    /* wide tables scroll inside their card */
+    .card:has(table){overflow-x:auto}
+    .card table{min-width:620px}
+    /* Today summary */
+    .hero{flex-direction:column;align-items:flex-start;gap:14px;padding:18px}
+    .hero .verdict{font-size:28px}
+    .hero > div[style*="text-align:right"]{text-align:left !important}
+    .glance-row .gt{width:72px;font-size:11.5px}
+    .glance-row .gs{white-space:normal;font-size:11.5px}
+    .sg-grid{grid-template-columns:1fr 1fr}
+    .muscle-wrap{justify-content:center}
     .body-figs{margin:0 auto}
+    .cal-grid{font-size:10px}
+    .ring-row{flex-wrap:wrap}
+    .topbar,.header-right{flex-wrap:wrap}
+  }
+  @media(max-width:400px){
+    .g4{grid-template-columns:1fr}
+    .sg-grid{grid-template-columns:1fr 1fr}
   }
   /* ---- Log tab ---- */
   .log-lab{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin:14px 0 7px}

@@ -420,6 +420,30 @@ tr.clickable:hover td{background:rgba(94,232,210,.045);cursor:pointer}
   .bs-it:active{border-color:var(--teal);color:var(--teal)}
 }
 
+/* ---------- V3.3 helper key (hover explainers) ---------- */
+.card-title.has-help{cursor:help}
+.card-title.has-help::after{
+  content:"ⓘ";flex:none;font-size:11px;color:var(--text3);margin-left:8px;
+  opacity:.55;transition:opacity .15s,color .15s;order:99;
+}
+.card-title.has-help:hover::after{opacity:1;color:var(--teal)}
+#helpbox{
+  display:none;position:fixed;z-index:130;max-width:320px;
+  background:rgba(23,28,27,.98);border:1px solid var(--border2);border-radius:14px;
+  padding:13px 15px;font-size:12px;line-height:1.55;color:var(--text2);
+  box-shadow:0 18px 50px rgba(0,0,0,.6);backdrop-filter:blur(10px);
+  text-transform:none;letter-spacing:0;
+}
+#helpbox .hb-what{color:var(--text);font-weight:500}
+#helpbox .hb-row{display:flex;gap:9px;margin-top:9px;align-items:flex-start}
+#helpbox .hb-row span{
+  flex:none;width:16px;height:16px;border-radius:6px;font-size:10px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;margin-top:1px;
+}
+#helpbox .hb-row.good span{background:rgba(78,207,127,.15);color:var(--st-good)}
+#helpbox .hb-row.bad span{background:rgba(232,183,60,.15);color:var(--st-warn)}
+#helpbox .hb-row div{flex:1}
+
 /* ---------- V3.2 spacing & card-sizing fixes ---------- */
 /* grid/flex children may not force min-content overflow */
 .grid > .card{min-width:0}

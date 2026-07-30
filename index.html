@@ -422,6 +422,11 @@ tr.clickable:hover td{background:rgba(94,232,210,.045);cursor:pointer}
   .bs-it:active{border-color:var(--teal);color:var(--teal)}
 }
 
+/* ---------- V3.4 handbook ---------- */
+.hb-link{cursor:pointer;font-family:inherit;transition:all .15s}
+.hb-link:hover{border-color:var(--teal);color:var(--teal)}
+@media(max-width:760px){#hb-frame{height:calc(100vh - 250px) !important}}
+
 /* ---------- V3.3 helper key (hover explainers) ---------- */
 .hb-i{
   position:absolute;top:11px;right:12px;z-index:5;
@@ -1457,6 +1462,7 @@ Plank 3x1 </textarea>
     const payload=JSON.parse(dec.decode(pt));
     (0,eval)(payload.data);                                   // sets window.GARMIN_DATA
     if(payload.strava) (0,eval)(payload.strava);              // optional window.STRAVA
+    if(payload.handbook) window.PULSE_HANDBOOK = payload.handbook;  // squad handbook (encrypted-only)
     const s=document.createElement('script');                 // run the dashboard app
     s.textContent=payload.main; document.body.appendChild(s);
     const nm=window.GARMIN_DATA&&window.GARMIN_DATA.athlete&&window.GARMIN_DATA.athlete.name;

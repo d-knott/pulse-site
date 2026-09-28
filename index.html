@@ -161,6 +161,21 @@
   .muscle:hover{filter:brightness(1.3)}
   .muscle.dim{opacity:.15}
   .muscle.hot{filter:drop-shadow(0 0 5px rgba(255,255,255,.8)) brightness(1.3)}
+  .muscle.dmg{animation:dmgPulse 1.5s ease-in-out infinite}
+  @keyframes dmgPulse{0%,100%{filter:drop-shadow(0 0 0 rgba(255,110,102,0))}50%{filter:drop-shadow(0 0 7px rgba(255,110,102,.95)) brightness(1.25)}}
+  .m-legend.v3{flex-direction:column;gap:6px;margin:14px 0 4px;width:100%}
+  .m-legend.v3 .lg{align-items:flex-start;line-height:1.35}
+  .m-legend.v3 .lg b{color:var(--text);font-weight:700;min-width:118px;display:inline-block}
+  .m-legend.v3 .lg .lg-dot{margin-top:3px;flex:none}
+  .rs-wrap{width:100%;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+  .rs-wrap .rs-title{font-size:11.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+  .rs-wrap .rs-title b{color:var(--text);text-transform:none;letter-spacing:0;font-size:12.5px}
+  .rs-bar{display:flex;height:14px;border-radius:99px;overflow:hidden;margin-top:6px}
+  .rs-bar i{display:block;height:100%}
+  .rs-lg{display:flex;gap:10px 14px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--text2)}
+  .rs-lg span{display:flex;align-items:center;gap:5px}
+  .rs-lg .lg-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .gate-why{font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.35}
   .m-list{max-height:600px;overflow-y:auto;padding-right:4px}
   .m-legend{display:flex;gap:14px;margin:2px 0 16px;flex-wrap:wrap}
   .m-legend .lg{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text2)}
@@ -610,6 +625,8 @@
                 <option value="easy">Easy run</option><option value="recovery">Recovery jog</option>
                 <option value="tempo">Tempo / threshold</option><option value="intervals" selected>Intervals / track</option>
                 <option value="long">Long run</option>
+                <option value="strides">Strides / sprints</option><option value="hills">Hill repeats</option>
+                <option value="downhill">Downhill run</option><option value="trail">Trail run</option>
               </select></label>
             <label class="fld">Distance (km)<input id="pr-dist" type="number" value="10" min="3" max="42" step="0.5"></label>
             <label class="fld">Day
@@ -811,13 +828,7 @@
     <!-- ============ TAB: MUSCLE LOAD ============ -->
     <section class="tab" id="tab-training">
       <div class="card">
-        <div class="card-title">Muscle fatigue map <span class="tag">estimated from last 7 days of training</span></div>
-        <div class="m-legend">
-          <span class="lg"><i class="lg-dot" style="background:#a6fb99"></i>Recovered (&lt;25%)</span>
-          <span class="lg"><i class="lg-dot" style="background:#f2e86d"></i>Light fatigue (25–50%)</span>
-          <span class="lg"><i class="lg-dot" style="background:#ffc966"></i>Moderate (50–75%)</span>
-          <span class="lg"><i class="lg-dot" style="background:#ff6e66"></i>High (&gt;75%)</span>
-        </div>
+        <div class="card-title">Muscle fatigue map <span class="tag">v3 run-type model · two-component decay · hover a group for the split</span></div>
         <div class="muscle-wrap">
           <div class="body-figs">
             <div class="body-fig">
@@ -932,6 +943,13 @@
             </div>
           </div>
           <div class="m-list" id="m-list"></div>
+          <div class="m-legend v3" id="m-legend-v3">
+            <span class="lg"><i class="lg-dot" style="background:#a6fb99"></i><span><b>Fresh · 0–25%</b> Fully available — push allowed, any session.</span></span>
+            <span class="lg"><i class="lg-dot" style="background:#f2e86d"></i><span><b>Loaded · 26–50%</b> Metabolic fatigue still clearing, structure fine. Easy and moderate work fine; avoid sessions where this group carries ≥ 20% of the load unless it is the only loaded group.</span></span>
+            <span class="lg"><i class="lg-dot" style="background:#ffc966"></i><span><b>Fatigued · 51–75%</b> Likely DOMS window (24–72 h post). No quality work on this group; easy running only if the metabolic part dominates. Easy, cross-training, upper body.</span></span>
+            <span class="lg"><i class="lg-dot" style="background:#ff6e66"></i><span><b>Damaged · 76–96%</b> Structural damage in progress — rest this group; strides or downhill here is where injuries start. Rest, swim, mobility.</span></span>
+          </div>
+          <div class="rs-wrap" id="run-share"></div>
         </div>
       </div>
 

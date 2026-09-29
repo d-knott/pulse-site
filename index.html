@@ -1289,8 +1289,8 @@
 <div id="lockscreen" style="position:fixed;inset:0;z-index:99999;background:#0c0d0d;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;font-family:'General Sans',system-ui,sans-serif;color:#e8efed">
   <div style="font-size:34px">&#x1F512;</div>
   <div style="font-size:20px;font-weight:600;letter-spacing:.3px">Pulse</div>
-  <div id="lock-msg" style="color:#9aa6a3;font-size:13px;max-width:280px;text-align:center">Enter your passphrase to decrypt your health data.</div>
-  <form id="lock-form" style="display:flex;gap:10px">
+  <div id="lock-msg" style="color:#9aa6a3;font-size:13px;max-width:280px;text-align:center">Loading your data…</div>
+  <form id="lock-form" style="display:none;gap:10px">
     <input id="lock-pass" type="password" autocomplete="current-password" placeholder="Passphrase"
       style="background:#161818;border:1px solid #242a29;border-radius:999px;padding:12px 18px;color:#e8efed;font-size:15px;outline:none;width:200px">
     <button type="submit" style="background:#79E2D7;border:0;border-radius:999px;padding:12px 22px;font-weight:600;font-size:15px;cursor:pointer">Unlock</button>
@@ -1300,6 +1300,14 @@
 (function(){
   const LS_KEY='pulse.passphrase', ENC='app.enc', enc=new TextEncoder(), dec=new TextDecoder();
   const msg=t=>{document.getElementById('lock-msg').textContent=t;};
+  const showForm=()=>{ const f=document.getElementById('lock-form'); if(f) f.style.display='flex'; };
+  /* Device unlock (fix 4.4, 29 Sep 26): the passphrase is remembered on this device (localStorage,
+     as before) and can also be seeded ONCE from the URL fragment — open
+     https://…/pulse-site/#k=<passphrase>, bookmark it / add it to the Home Screen, and the app
+     opens without a prompt. The fragment never leaves the browser (not sent to the server, not
+     in the published site) and is stripped from the address bar as soon as it is read.
+     window.pulseLock() forgets the passphrase on this device (the "Lock now" action in Settings). */
+  window.pulseLock=function(){ try{localStorage.removeItem(LS_KEY);}catch(e){} location.replace(location.pathname); };
 
   async function deriveKey(pass,salt){
     const base=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveKey']);
@@ -1336,8 +1344,15 @@
 
   window.addEventListener('load',async()=>{
     if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
+    let fromUrl=null;
+    try{ const m=/[#&]k=([^&]+)/.exec(location.hash||''); if(m){ fromUrl=decodeURIComponent(m[1]); history.replaceState(null,'',location.pathname+location.search); } }catch(e){}
     const saved=(()=>{try{return localStorage.getItem(LS_KEY);}catch(e){return null;}})();
-    if(saved){ try{ await unlock(saved); }catch(e){ try{localStorage.removeItem(LS_KEY);}catch(_){} msg(e.nodata?'No synced data yet — run the sync workflow once, then reload.':'Saved passphrase no longer works — enter it again.'); } }
+    for(const p of [fromUrl, saved].filter(Boolean)){
+      try{ await unlock(p); return; }
+      catch(e){ if(e.nodata){ msg('No synced data yet — run the sync workflow once, then reload.'); return; }
+        if(p===saved){ try{localStorage.removeItem(LS_KEY);}catch(_){} } }
+    }
+    msg(fromUrl ? 'The passphrase in that link didn’t work — enter it here.' : saved ? 'Saved passphrase no longer works — enter it again.' : 'Enter your passphrase to decrypt your health data.'); showForm();
   });
 })();
 </script>

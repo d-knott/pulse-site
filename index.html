@@ -47,14 +47,22 @@
   .logo-name{font-weight:700;font-size:17px;letter-spacing:.3px}
   .logo-name span{color:var(--teal)}
   .nav{display:flex;flex-direction:column;gap:2px;flex:1}
-  .nav-item{
+  .sidebar .nav-item{
     display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;
     color:var(--text2);cursor:pointer;font-weight:500;border:none;background:none;
     font-size:13.5px;text-align:left;width:100%;transition:all .15s;
   }
-  .nav-item svg{width:18px;height:18px;flex-shrink:0}
-  .nav-item:hover{background:var(--card);color:var(--text)}
-  .nav-item.active{background:rgba(121,226,215,.13);color:var(--teal);border-radius:12px}
+  .sidebar .nav-item svg{width:18px;height:18px;flex-shrink:0}
+  .sidebar .nav-item:hover{background:var(--card);color:var(--text)}
+  .sidebar .nav-item.active{background:rgba(121,226,215,.13);color:var(--teal);border-radius:12px}
+  /* Phase 2.1 — segmented sub-nav (one row per group; only the active group's row is shown) */
+  .subnav{display:flex;gap:4px;margin:-6px 0 18px;padding:4px;background:var(--card2);border:1px solid var(--border);border-radius:99px;width:max-content;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .subnav::-webkit-scrollbar{display:none}
+  .subnav:empty,.subnav.single{display:none}
+  .subnav .nav-item{display:none;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;border:none;background:none;color:var(--text2);font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;min-height:34px}
+  .subnav .nav-item[data-group].show{display:inline-flex}
+  .subnav .nav-item:hover{color:var(--text)}
+  .subnav .nav-item.active{background:var(--card);color:var(--teal);box-shadow:0 1px 4px rgba(0,0,0,.35)}
   .nav-sep{height:1px;background:var(--border);margin:10px 6px}
   .sidebar-foot{padding:12px 10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
   .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
@@ -274,9 +282,12 @@
       -webkit-overflow-scrolling:touch;scrollbar-width:none;background:rgba(14,16,16,.96);backdrop-filter:blur(14px)}
     .sidebar::-webkit-scrollbar{display:none}
     .nav{flex-direction:row;gap:0;flex:none}
-    .nav-item{flex-direction:column;gap:3px;padding:7px 9px;min-width:62px;width:auto;flex:none;border-radius:12px} /* fix 1.1: the desktop rule sets width:100% — on the phone bar that stretched every item to the full nav width and pushed the icons off-screen */
-    .nav-item span{display:block;font-size:9px;white-space:nowrap}
-    .nav-item svg{width:19px;height:19px}
+    .sidebar .nav-item{flex-direction:column;gap:3px;padding:7px 9px;min-width:62px;width:auto;flex:none;border-radius:12px} /* fix 1.1: the desktop rule sets width:100% — on the phone bar that stretched every item to the full nav width and pushed the icons off-screen */
+    .sidebar .nav-item span{display:block;font-size:9px;white-space:nowrap}
+    .sidebar .nav-item svg{width:19px;height:19px}
+    .nav{justify-content:space-around;width:100%}
+    .subnav{width:100%;max-width:100%;margin:-4px 0 14px;border-radius:14px}
+    .subnav .nav-item{padding:8px 12px;font-size:12px;flex:1 0 auto;justify-content:center;min-height:38px}
     .nav-sep,.sidebar-foot,.logo{display:none}
     .main{margin-left:0;padding:14px 13px calc(86px + env(safe-area-inset-bottom));max-width:100%}
     .header h1{font-size:20px}
@@ -346,62 +357,22 @@
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 16V12.75"/><path d="M3.145 5.95L8.395 1.96C8.753 1.688 9.248 1.688 9.605 1.96L14.855 5.95C15.104 6.139 15.25 6.434 15.25 6.746V14.25C15.25 15.355 14.355 16.25 13.25 16.25H4.75C3.645 16.25 2.75 15.355 2.75 14.25V6.746C2.75 6.433 2.896 6.139 3.145 5.95Z"/></svg>
         <span>Today</span>
       </button>
-      <button class="nav-item" data-tab="calendar">
+      <button class="nav-item" data-tab="train">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5.75" y1="2.75" x2="5.75" y2=".75"/><line x1="12.25" y1="2.75" x2="12.25" y2=".75"/><rect x="2.25" y="2.75" width="13.5" height="12.5" rx="2" ry="2"/><line x1="2.25" y1="6.25" x2="15.75" y2="6.25"/><path d="M9,8.25c-.551,0-1,.449-1,1s.449,1,1,1,1-.449,1-1-.449-1-1-1Z" fill="currentColor" stroke="none"/><path d="M12.5,10.25c.551,0,1-.449,1-1s-.449-1-1-1-1,.449-1,1,.449,1,1,1Z" fill="currentColor" stroke="none"/><path d="M9,11.25c-.551,0-1,.449-1,1s.449,1,1,1,1-.449,1-1-.449-1-1-1Z" fill="currentColor" stroke="none"/><path d="M5.5,11.25c-.551,0-1,.449-1,1s.449,1,1,1,1-.449,1-1-.449-1-1-1Z" fill="currentColor" stroke="none"/><path d="M12.5,11.25c-.551,0-1,.449-1,1s.449,1,1,1,1-.449,1-1-.449-1-1-1Z" fill="currentColor" stroke="none"/></svg>
-        <span>Calendar</span>
+        <span>Train</span>
       </button>
-      <button class="nav-item" data-tab="plan">
-        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.75" y="2.75" width="12.5" height="12.5" rx="2"/><path d="M5.75 9.25l2 2 4.5-4.5"/></svg>
-        <span>Plan</span>
-      </button>
-      <button class="nav-item" data-tab="activity">
-        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7505 7.25H9.49905L9.81065 1.9868C9.82325 1.7732 9.55085 1.6734 9.42255 1.8446L3.04965 10.3501C2.92615 10.5149 3.04376 10.75 3.24976 10.75H8.50115L8.18955 16.0132C8.17695 16.2268 8.44935 16.3266 8.57765 16.1554L14.9506 7.6499C15.0741 7.4851 14.9565 7.25 14.7505 7.25Z"/></svg>
-        <span>Activity</span>
-      </button>
-      <button class="nav-item" data-tab="running">
-        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="6.75" y1="1.25" x2="11.25" y2="1.25"/><line x1="9" y1="1.25" x2="9" y2="3.75"/><circle cx="9" cy="10" r="6.25"/><line x1="6.702" y1="7.702" x2="9" y2="10"/><line x1="14.25" y1="2.75" x2="16.25" y2="4.75"/></svg>
-        <span>Running</span>
-      </button>
-      <button class="nav-item" data-tab="hockey">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 3l7 13a3 3 0 0 0 2.6 1.5H18a2 2 0 0 0 0-4h-3L8 3"/><circle cx="18" cy="20" r="1.6"/></svg>
-        <span>Hockey</span>
-      </button>
-      <button class="nav-item" data-tab="sleep">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
-        <span>Sleep</span>
-      </button>
-      <button class="nav-item" data-tab="recovery">
+      <button class="nav-item" data-tab="body">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.529,15.222c.297,.155,.644,.155,.941,0,1.57-.819,6.529-3.787,6.529-8.613,.008-2.12-1.704-3.846-3.826-3.859-1.277,.016-2.464,.66-3.173,1.72-.71-1.06-1.897-1.704-3.173-1.72-2.123,.013-3.834,1.739-3.826,3.859,0,4.826,4.959,7.794,6.529,8.613Z"/></svg>
-        <span>Recovery</span>
+        <span>Body</span>
       </button>
-      <button class="nav-item" data-tab="training">
-        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.75V4.75"/><path d="M14.127 4.87299L12.712 6.28799"/><path d="M16.25 10H14.25"/><path d="M3.87305 4.87299L8.29305 9.293"/><path d="M1.75 10H3.75"/><path d="M6.45264 3.2103C7.24504 2.9128 8.10363 2.75 9.00003 2.75C13.004 2.75 16.25 5.996 16.25 10C16.25 12.002 15.439 13.815 14.127 15.127L12.713 13.713"/><path d="M5.28799 13.712L3.87399 15.126C2.56199 13.814 1.75 12.002 1.75 9.99899C1.75 9.10279 1.91271 8.2445 2.21001 7.4523"/><path d="M9 11.25C9.69 11.25 10.25 10.69 10.25 10C10.25 9.31 9.69 8.75 9 8.75C8.31 8.75 7.75 9.31 7.75 10C7.75 10.69 8.31 11.25 9 11.25Z" fill="currentColor"/></svg>
-        <span>Muscle Load</span>
-      </button>
-      <button class="nav-item" data-tab="gym">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13"/><path d="M8 8l4-4 4 4"/><rect x="4" y="16" width="16" height="5" rx="2"/></svg>
-        <span>Gym Sessions</span>
-      </button>
-      <button class="nav-item" data-tab="library">
-        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9,15.051c.17,0,.339-.045,.494-.134,.643-.371,1.732-.847,3.141-.845,.899,.001,1.667,.197,2.27,.435,.648,.255,1.344-.24,1.344-.937V4.487c0-.354-.181-.68-.486-.86-.637-.376-1.726-.863-3.14-.863-1.89,0-3.198,.872-3.624,1.182"/><path d="M9,15.051c-.17,0-.339-.045-.494-.134-.643-.371-1.732-.847-3.141-.845-.899,.001-1.667,.197-2.27,.435-.648,.255-1.344-.237-1.344-.933,0-2.593,0-7.472,0-9.09,0-.354,.181-.676,.486-.856,.637-.376,1.726-.863,3.14-.863,1.89,0,3.198,.872,3.624,1.182h0s0,11.104,0,11.104Z"/></svg>
-        <span>Library</span>
-      </button>
-      <button class="nav-item" data-tab="testing">
-        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.25,2.75h-1c-1.105,0-2,.895-2,2V14.25c0,1.105,.895,2,2,2h7.5c1.105,0,2-.895,2-2V4.75c0-1.105-.895-2-2-2h-1"/><rect x="6.25" y="1.25" width="5.5" height="3" rx="1" ry="1"/><polyline points="6.25 10.25 8 12.25 11.75 7.25"/></svg>
-        <span>Testing &amp; Body</span>
-      </button>
-      <button class="nav-item" data-tab="trends">
+      <button class="nav-item" data-tab="performance">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="13.25" y="2.75" width="2.5" height="12.5" rx="1" ry="1"/><rect x="7.75" y="7.75" width="2.5" height="7.5" rx="1" ry="1"/><rect x="2.25" y="11.75" width="2.5" height="3.5" rx="1" ry="1"/><polyline points="6.25 2.75 8.75 2.75 8.75 5.25"/><line x1="8.5" y1="3" x2="2.75" y2="8.75"/></svg>
-        <span>Trends</span>
+        <span>Performance</span>
       </button>
       <div class="nav-sep"></div>
-      <button class="nav-item" data-tab="sync">
-        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 12.75L10.75 15L8.5 17.25"/><path d="M4.655 4.505C3.4774 5.6413 2.75 7.2359 2.75 9C2.75 12.452 5.55 15.25 9 15.25C9.6 15.25 10.17 15.166 10.72 15.01"/><path d="M9.5 5.25L7.25 3L9.5 0.75"/><path d="M13.3444 13.4937C14.5146 12.3575 15.25 10.7634 15.25 9C15.25 5.548 12.45 2.75 9.00002 2.75C8.42002 2.75 7.86002 2.82895 7.33002 2.97595"/></svg>
-        <span>Data Sync</span>
-      </button>
-      <button class="nav-item" data-tab="settings">
+      <button class="nav-item" data-tab="more">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="13.25" y1="5.25" x2="16.25" y2="5.25"/><line x1="1.75" y1="5.25" x2="8.75" y2="5.25"/><circle cx="11" cy="5.25" r="2.25"/><line x1="4.75" y1="12.75" x2="1.75" y2="12.75"/><line x1="16.25" y1="12.75" x2="9.25" y2="12.75"/><circle cx="7" cy="12.75" r="2.25"/></svg>
-        <span>Settings</span>
+        <span>More</span>
       </button>
     </nav>
     <div class="sidebar-foot">
@@ -425,6 +396,9 @@
         <button class="btn" onclick="fakeSync()">⟳ Sync now</button>
       </div>
     </div>
+    <!-- Phase 2.1: sub-pages of the active group. Every sub-page keeps its old data-tab id, so
+         glance rows, deep links and tests still click .nav-item[data-tab="sleep"] etc. -->
+    <div class="subnav" id="subnav"></div>
 
     <!-- ============ TAB: TODAY ============ -->
     <section class="tab active" id="tab-today">

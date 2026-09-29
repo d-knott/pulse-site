@@ -19,7 +19,7 @@
   :root{
     --bg:#0c0d0d; --bg2:#101313; --card:#151818; --card2:#1b1f1f;
     --border:#242a29; --border2:#313938;
-    --text:#eef2f1; --text2:#9aa6a3; --text3:#68716f;
+    --text:#eef2f1; --text2:#9aa6a3; --text3:#8a9592;   /* Phase 3.2: #68716f was 3.6:1 on --card; #8a9592 is 5.8:1 (AA) */
     --teal:#79e2d7; --blue:#95b9ff; --purple:#bfa8ff; --orange:#ffc966;
     --green:#a6fb99; --red:#ff6e66; --pink:#ff8fa3; --cyan:#8fe8ff;
     --radius:20px;
@@ -98,12 +98,19 @@
     padding:18px 20px;position:relative;
   }
   .card-title{font-size:12.5px;font-weight:500;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
-  .card-title .tag{font-size:10.5px;padding:3px 10px;border-radius:99px;background:var(--card2);border:1px solid var(--border);color:var(--text3)}
+  .card-title .tag{font-size:11px;padding:3px 10px;border-radius:99px;background:var(--card2);border:1px solid var(--border);color:var(--text3)}
   .card-title .t-ic{width:28px;height:28px;border-radius:9px;background:var(--card2);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:13px}
   .metric{font-size:30px;font-weight:700;letter-spacing:-.4px;margin:4px 0 2px}
   .metric small{font-size:14px;font-weight:600;color:var(--text2);margin-left:2px}
   .delta{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
   .delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--text3)} .delta.warn{color:var(--orange)}
+  /* Phase 3.7: two-point comparisons are a stat with an arrow; colour-band charts carry a legend */
+  .two-pt{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 6px 6px}
+  .tp-side{text-align:center;flex:1;min-width:0} .tp-v{font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1} .tp-l{font-size:11px;color:var(--text3);margin-top:6px}
+  .tp-arrow{font-size:17px;font-weight:700;white-space:nowrap} .tp-arrow.up{color:var(--green)} .tp-arrow.down{color:var(--red)} .tp-arrow.flat{color:var(--text3)}
+  .tp-note{font-size:11px;color:var(--text3);margin-top:10px}
+  .chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text2);margin-top:8px}
+  .chart-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
   .spark{margin-top:10px;height:42px}
   .chart-wrap{position:relative;margin-top:12px}
   section.tab{display:none;animation:fadeIn .25s ease}
@@ -118,7 +125,7 @@
   .ring svg{transform:rotate(-90deg)}
   .ring .ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
   .ring .ring-num{font-size:26px;font-weight:800;line-height:1}
-  .ring .ring-cap{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-top:3px}
+  .ring .ring-cap{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-top:3px}
   .ring-legend{flex:1;display:flex;flex-direction:column;gap:8px}
   .lg-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px}
   .lg-row .lg-l{display:flex;align-items:center;gap:8px;color:var(--text2)}
@@ -134,6 +141,11 @@
     width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
     flex-shrink:0;font-size:16px;background:rgba(121,226,215,.12);
   }
+  .insight .ic svg{width:17px;height:17px;color:var(--text)}
+  .insight.warn .ic svg{color:var(--orange)} .insight.alert .ic svg{color:var(--red)} .insight.good .ic svg{color:var(--green)} .insight.info .ic svg{color:var(--blue)}
+  .btn svg{width:14px;height:14px;vertical-align:-2px;margin-right:6px}
+  .cal-chip svg{width:10px;height:10px;vertical-align:-1px;margin-right:2px}
+  .p-name svg,.p-meta svg{width:13px;height:13px;vertical-align:-2px;margin-right:4px}
   .insight.warn{border-left-color:var(--orange)} .insight.warn .ic{background:rgba(255,201,102,.12)}
   .insight.alert{border-left-color:var(--red)} .insight.alert .ic{background:rgba(255,110,102,.12)}
   .insight.info{border-left-color:var(--blue)} .insight.info .ic{background:rgba(149,185,255,.12)}
@@ -155,7 +167,7 @@
   tr:last-child td{border-bottom:none}
   tr.clickable:hover td{background:rgba(121,226,215,.04);cursor:pointer}
   .sport-ic{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;margin-right:9px;vertical-align:middle}
-  .badge{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
   .badge.low{background:rgba(166,251,153,.14);color:var(--green)}
   .badge.mod{background:rgba(255,201,102,.14);color:var(--orange)}
   .badge.high{background:rgba(255,110,102,.14);color:var(--red)}
@@ -166,6 +178,7 @@
   .body-fig{text-align:center}
   .body-fig .cap{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-top:6px}
   .muscle{cursor:pointer;transition:opacity .15s}
+  .muscle.lit{filter:url(#glow2F)}
   .muscle:hover{filter:brightness(1.3)}
   .muscle.dim{opacity:.15}
   .muscle.hot{filter:drop-shadow(0 0 5px rgba(255,255,255,.8)) brightness(1.3)}
@@ -184,7 +197,9 @@
   .rs-lg span{display:flex;align-items:center;gap:5px}
   .rs-lg .lg-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
   .gate-why{font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.35}
-  .m-list{max-height:600px;overflow-y:auto;padding-right:4px}
+  .m-list{padding-right:4px}
+  .m-list .m-row.more{display:none} .m-list.all .m-row.more{display:block}
+  .m-showall{margin-top:4px;align-self:flex-start}
   .m-legend{display:flex;gap:14px;margin:2px 0 16px;flex-wrap:wrap}
   .m-legend .lg{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text2)}
   .m-list{flex:1;min-width:280px;display:flex;flex-direction:column;gap:9px}
@@ -213,7 +228,7 @@
   .imp-val{width:56px;text-align:right;font-weight:700;flex-shrink:0}
   .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
   .sum-cell{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:11px 13px}
-  .sum-cell .s-k{font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
+  .sum-cell .s-k{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
   .sum-cell .s-v{font-size:19px;font-weight:800;margin-top:2px}
   @media(max-width:1080px){.sum-grid{grid-template-columns:repeat(2,1fr)}}
   /* ---------- Calendar ---------- */
@@ -223,7 +238,7 @@
   .cal-nav button{width:32px;height:32px;border-radius:10px;border:1px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;font-size:14px}
   .cal-nav button:hover{border-color:var(--teal);color:var(--teal)}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
-  .cal-dow{font-size:10.5px;color:var(--text3);text-align:center;padding:2px 0;font-weight:600}
+  .cal-dow{font-size:11px;color:var(--text3);text-align:center;padding:2px 0;font-weight:600}
   .cal-cell{background:var(--card2);border:1px solid var(--border);border-radius:14px;min-height:92px;padding:7px 7px;cursor:pointer;transition:border-color .15s;display:flex;flex-direction:column;gap:3px;overflow:hidden}
   .cal-cell:hover{border-color:var(--teal)}
   .cal-cell.other{opacity:.3}
@@ -231,10 +246,10 @@
   .cal-cell.sel{box-shadow:inset 0 0 0 1.5px var(--orange)}
   .cal-num{font-size:11px;color:var(--text3);font-weight:600}
   .cal-cell.today .cal-num{color:var(--teal)}
-  .cal-chip{font-size:9.5px;font-weight:600;padding:2.5px 6px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#0e1615}
+  .cal-chip{font-size:11px;font-weight:600;padding:2.5px 6px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#0e1615}
   .cal-chip.done{opacity:.5}
   .cal-chip.ghost{background:transparent!important;border:1px dashed var(--border2);color:var(--text2)}
-  .cal-more{font-size:9.5px;color:var(--text3)}
+  .cal-more{font-size:11px;color:var(--text3)}
   .wk-chips{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
   .lib-note{font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.5}
   /* ---------- Forms & planner ---------- */
@@ -272,6 +287,18 @@
   #tt span{color:var(--text2)}
   /* ---------- Toast ---------- */
   #toast{position:fixed;bottom:24px;right:24px;background:#1e2424;border:1px solid var(--teal);color:var(--text);padding:12px 18px;border-radius:12px;font-size:13px;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  /* ---------- Phase 3.1: hierarchy — one main block per tab at full strength ---------- */
+  section.tab .card:not(.card-main){background:rgba(21,24,24,.6);border-color:transparent;border-radius:16px}
+  section.tab .card:not(.card-main) > .card-title{font-size:11.5px;color:var(--text3)}
+  section.tab .card.card-main{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:0 12px 32px rgba(0,0,0,.28)}
+  section.tab .card.card-main > .card-title{font-size:14px;font-weight:600;color:var(--text)}
+  .card .card,.insight,.plan-card,.m-row{background:var(--card2)}
+  /* Phase 3.6: rows read as rows — the 3 px type stripe stays, the per-row gradient goes */
+  tr.clickable{background:none !important}
+  tr.clickable:hover td{background:rgba(255,255,255,.025)}
+  /* Phase 3.8: compact phone header pieces (desktop shows the long pill + button text) */
+  .pill-short{display:none}
+  .sync-btn svg{width:15px;height:15px;vertical-align:-3px;margin-right:6px}
   /* ---------- Responsive ---------- */
   @media(max-width:1080px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}.g23,.g32{grid-template-columns:1fr}}
   @media(max-width:760px){
@@ -283,7 +310,7 @@
     .sidebar::-webkit-scrollbar{display:none}
     .nav{flex-direction:row;gap:0;flex:none}
     .sidebar .nav-item{flex-direction:column;gap:3px;padding:7px 9px;min-width:62px;width:auto;flex:none;border-radius:12px} /* fix 1.1: the desktop rule sets width:100% — on the phone bar that stretched every item to the full nav width and pushed the icons off-screen */
-    .sidebar .nav-item span{display:block;font-size:9px;white-space:nowrap}
+    .sidebar .nav-item span{display:block;font-size:11px;white-space:nowrap}
     .sidebar .nav-item svg{width:19px;height:19px}
     .nav{justify-content:space-around;width:100%}
     .subnav{width:100%;max-width:100%;margin:-4px 0 14px;border-radius:14px}
@@ -314,12 +341,38 @@
     .hero{padding:16px}
     .hs-name{font-size:18px}
     .gate-chip{font-size:13px;padding:8px 12px}
+    /* Phase 3.8: header = title row with a freshness dot and a sync icon; first card within 90 px */
+    .header{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:nowrap}
+    .header > div:first-child{flex:1;min-width:0}
+    .header h1{font-size:20px;line-height:1.15}
+    .header .sub{display:none}
+    .header-right{flex:none;gap:6px;flex-wrap:nowrap}
+    .header-right .pill{padding:6px 10px;font-size:11px} .pill-full{display:none} .pill-short{display:inline}
+    .sync-btn{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+    .sync-btn svg{margin:0;width:18px;height:18px} .sync-btn .sync-txt{display:none}
+    .subnav{margin-top:0}
+    /* Phase 3.3: 44 px touch targets */
+    .btn{min-height:44px;padding-top:10px;padding-bottom:10px}
+    .subnav .nav-item{min-height:44px}
+    .cal-nav button{width:44px;height:44px}
+    .glance-row{min-height:52px}
+    .fld select,.fld input,.log-in,.ta{min-height:44px}
+    .fld input[type=date]{min-width:150px}
+    .seg button{min-height:44px;padding:8px 14px}
+    .plan-x{min-width:44px;min-height:44px}
+    details > summary{min-height:44px;display:flex;align-items:center}
+    td .badge[onclick]{display:inline-flex;align-items:center;min-height:44px;padding:0 12px}
+    tr.clickable td{padding-top:13px;padding-bottom:13px}
+    #act-modal .close{min-width:44px;min-height:44px}
+    .m-showall{min-height:44px}
+    .cal-cell{min-height:64px;padding:5px 4px}
+    .cal-chip{font-size:11px;padding:2px 4px}
     .glance-row .gt{width:72px;font-size:11.5px}
     .glance-row .gs{white-space:normal;font-size:11.5px}
     .sg-grid{grid-template-columns:1fr 1fr}
     .muscle-wrap{justify-content:center}
     .body-figs{margin:0 auto}
-    .cal-grid{font-size:10px}
+    .cal-grid{font-size:11px}
     .ring-row{flex-wrap:wrap}
     .topbar,.header-right{flex-wrap:wrap}
   }
@@ -332,7 +385,7 @@
   .logrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
   .log-in{background:var(--card2);border:1px solid var(--border);border-radius:12px;color:var(--text);padding:9px 12px;font-family:inherit;font-size:13px}
   .seg{display:flex;gap:6px;flex-wrap:wrap}
-  .seg button{min-width:36px;padding:8px 0;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;font-size:12.5px}
+  .seg button{min-width:36px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;font-size:12.5px}
   .seg button.sel{background:var(--teal);color:#04231e;font-weight:800;border-color:transparent}
   .seg button:hover{border-color:var(--border2);color:var(--text)}
   .log-saved{color:var(--teal);font-size:12px;font-weight:600}
@@ -392,8 +445,8 @@
         <div class="sub" id="page-sub"></div>
       </div>
       <div class="header-right">
-        <div class="pill" id="sync-pill"><span class="dot"></span> Demo data — no sync yet</div>
-        <button class="btn" onclick="fakeSync()">⟳ Sync now</button>
+        <div class="pill" id="sync-pill"><span class="dot"></span> <span class="pill-full">Demo data — no sync yet</span><span class="pill-short">demo</span></div>
+        <button class="btn sync-btn" onclick="fakeSync()" title="Sync now" aria-label="Sync now"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 12.75L10.75 15L8.5 17.25"/><path d="M4.655 4.505C3.4774 5.6413 2.75 7.2359 2.75 9C2.75 12.452 5.55 15.25 9 15.25C9.6 15.25 10.17 15.166 10.72 15.01"/><path d="M9.5 5.25L7.25 3L9.5 0.75"/><path d="M13.3444 13.4937C14.5146 12.3575 15.25 10.7634 15.25 9C15.25 5.548 12.45 2.75 9.00002 2.75C8.42002 2.75 7.86002 2.82895 7.33002 2.97595"/></svg><span class="sync-txt">Sync now</span></button>
       </div>
     </div>
     <!-- Phase 2.1: sub-pages of the active group. Every sub-page keeps its old data-tab id, so
@@ -406,7 +459,7 @@
       <div class="grid g4">
         <div class="card">
           <div class="card-title">Readiness <span class="t-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.75V4.75"/><path d="M14.127 4.87299L12.712 6.28799"/><path d="M16.25 10H14.25"/><path d="M3.87305 4.87299L8.29305 9.293"/><path d="M1.75 10H3.75"/><path d="M6.45264 3.2103C7.24504 2.9128 8.10363 2.75 9.00003 2.75C13.004 2.75 16.25 5.996 16.25 10C16.25 12.002 15.439 13.815 14.127 15.127L12.713 13.713"/><path d="M5.28799 13.712L3.87399 15.126C2.56199 13.814 1.75 12.002 1.75 9.99899C1.75 9.10279 1.91271 8.2445 2.21001 7.4523"/><path d="M9 11.25C9.69 11.25 10.25 10.69 10.25 10C10.25 9.31 9.69 8.75 9 8.75C8.31 8.75 7.75 9.31 7.75 10C7.75 10.69 8.31 11.25 9 11.25Z" fill="currentColor"/></svg></span></div>
-          <div class="metric" style="color:var(--teal)" id="m-readiness">78<small>/100</small></div>
+          <div class="metric" id="m-readiness">78<small>/100</small></div>
           <span class="delta up" id="d-readiness">▲ 6 vs yesterday</span>
           <div class="spark"><canvas id="sp-readiness"></canvas></div>
         </div>
@@ -438,7 +491,7 @@
         <div class="card">
           <div class="card-title">Daily goals</div>
           <div class="seg-wrap">
-            <span class="seg-chip" style="background:var(--teal);color:#0e1615;border-color:var(--teal)">Achieved</span>
+            <span class="seg-chip" style="background:var(--green);color:#0e1615;border-color:var(--green)">Achieved</span>
             <div class="seg-track"><div class="seg-fill" style="width:64%"></div></div>
             <span class="seg-chip">3 of 4 goals</span>
           </div>
@@ -604,7 +657,7 @@
       <div class="grid g4">
         <div class="card"><div class="card-title">This week</div><div class="metric">46.3<small>km</small></div><span class="delta up">▲ 12% vs last wk · 4 runs</span></div>
         <div class="card"><div class="card-title">Avg pace (Z2)</div><div class="metric">5:05<small>/km</small></div><span class="delta up">▲ 9 s faster vs 4-wk avg</span></div>
-        <div class="card"><div class="card-title">Training status</div><div class="metric" style="color:var(--teal);font-size:24px;margin-top:8px">Productive</div><span class="delta up">▲ Fitness rising, fatigue in range</span></div>
+        <div class="card"><div class="card-title">Training status</div><div class="metric" style="font-size:24px;margin-top:8px">Productive</div><span class="delta up">▲ Fitness rising, fatigue in range</span></div>
         <div class="card"><div class="card-title">Race predictor</div><div class="metric" style="font-size:22px;margin-top:6px">10K · 44:20</div><span class="delta flat">— 5K 21:15 · HM 1:38:40</span></div>
       </div>
 
@@ -616,7 +669,7 @@
         <div class="card">
           <div class="card-title">Time in HR zones — 4 weeks</div>
           <div class="chart-wrap" style="height:210px"><canvas id="ch-runzones"></canvas></div>
-          <div style="font-size:11.5px;color:var(--text3);margin-top:10px">Target: ~80% low intensity (Z1–Z2). Current: <b style="color:var(--teal)">78%</b> — good polarisation.</div>
+          <div style="font-size:11.5px;color:var(--text3);margin-top:10px">Target: ~80% low intensity (Z1–Z2). Current: <b style="color:var(--green)">78%</b> — good polarisation.</div>
         </div>
       </div>
 
@@ -700,7 +753,7 @@
           </div>
           <div class="kv" style="margin-top:12px"><span class="k">Days since last match</span><span class="v">4</span></div>
           <div class="kv"><span class="k">Last match recovery cost</span><span class="v">Load 171 · ~36 h</span></div>
-          <div class="kv"><span class="k">Recommendation</span><span class="v" style="color:var(--teal)">No leg work after Wed</span></div>
+          <div class="kv"><span class="k">Recommendation</span><span class="v">No leg work after Wed</span></div>
         </div>
         <div class="card">
           <div class="card-title">Repeat-sprint fatigue — sprint decrement per match <span class="tag">lower = better late-game speed</span></div>
@@ -777,7 +830,7 @@
           <div style="display:flex;align-items:center;gap:20px;margin-top:10px">
             <div class="ring" id="ring-recovery" style="width:130px;height:130px"></div>
             <div>
-              <div style="font-size:17px;font-weight:800;color:var(--teal)">Ready to train</div>
+              <div style="font-size:17px;font-weight:800;color:var(--green)">Ready to train</div>
               <p style="font-size:12.5px;color:var(--text2);margin-top:5px">HRV stable, RHR below average and sleep debt cleared. Suited to a moderate–hard session today.</p>
               <div style="margin-top:10px"><span class="badge low">Full recovery in ~9 h</span></div>
             </div>
@@ -852,7 +905,7 @@
                   <path d="M56,140 Q64,144 70,140 M150,140 Q156,144 164,140"/>
                   <circle cx="89" cy="348" r="6"/><circle cx="131" cy="348" r="6"/>
                 </g>
-                <g filter="url(#glow2F)" stroke-width="1.1">
+                <g stroke-width="1.1">
                   <g class="muscle" data-m="traps"><use href="#f2-trap"/><use href="#f2-trap" transform="translate(220,0) scale(-1,1)"/></g>
                   <g class="muscle" data-m="shoulders"><use href="#f2-delt"/><use href="#f2-delt" transform="translate(220,0) scale(-1,1)"/></g>
                   <g class="muscle" data-m="chest"><use href="#f2-pec"/><use href="#f2-pec" transform="translate(220,0) scale(-1,1)"/></g>
@@ -909,7 +962,7 @@
                   <path d="M80,400 Q90,405 100,400 M120,400 Q130,405 140,400"/>
                   <circle cx="89" cy="352" r="5"/><circle cx="131" cy="352" r="5"/>
                 </g>
-                <g filter="url(#glow2B)" stroke-width="1.1">
+                <g stroke-width="1.1">
                   <g class="muscle" data-m="traps"><use href="#b2-trap"/><use href="#b2-trap" transform="translate(220,0) scale(-1,1)"/></g>
                   <g class="muscle" data-m="shoulders"><use href="#b2-delt"/><use href="#b2-delt" transform="translate(220,0) scale(-1,1)"/></g>
                   <g class="muscle" data-m="lats"><use href="#b2-infra"/><use href="#b2-lat"/><use href="#b2-infra" transform="translate(220,0) scale(-1,1)"/><use href="#b2-lat" transform="translate(220,0) scale(-1,1)"/></g>
@@ -943,6 +996,8 @@
         <div class="card">
           <div class="card-title">Suggested focus</div>
           <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px" id="insights-training"></div>
+          <details style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);padding:6px 0">About the model</summary>
+            <p style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5">Runs use the v3 run-type model: each run is classified (easy, long, tempo, intervals, strides, hills, downhill, trail, race), scored on internal (Banister TRIMP), impact and eccentric load, and stored as a fast metabolic component (τ 0.9 d) plus a slow structural one (τ by muscle × damage class) — Dorn 2012 muscle forces, Vernillo 2017 grade effects, Bontemps 2020 recovery and repeated-bout effect. A thin running base scales structural damage up and slows its clock (Paulsen 2012 unaccustomed-exercise classes), and soreness peaks the next morning rather than at the finish line. Hockey, swimming and gym sessions keep their v2 EMG-based shares (Reilly &amp; Borrie; Pink &amp; Perry). Recovery sessions apply small, evidence-sized reductions (Poppendieck 2016; Bleakley 2012).</p></details>
         </div>
       </div>
     </section>
@@ -962,8 +1017,8 @@
           <p style="font-size:12px;color:var(--text3);margin:8px 0 10px">Format: one exercise per line — <b style="color:var(--text2)">Exercise&nbsp; sets×reps&nbsp; weight</b> (e.g. “Back Squat 5x5 100kg”). Bodyweight moves can omit the weight.</p>
           <textarea class="ta" id="gym-input" placeholder="Back Squat 5x5 100kg&#10;Romanian Deadlift 3x8 90kg&#10;Walking Lunges 3x12 20kg&#10;Leg Curl 3x10 45kg&#10;Standing Calf Raise 4x15 60kg&#10;Plank 3x1 "></textarea>
           <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
-            <button class="btn primary" onclick="analyzeSession()">⚡ Analyse session</button>
-            <button class="btn" onclick="document.getElementById('gym-file').click()">📄 Upload file</button>
+            <button class="btn primary" onclick="analyzeSession()">Analyse session</button>
+            <button class="btn" onclick="document.getElementById('gym-file').click()">Upload file</button>
             <input type="file" id="gym-file" accept=".txt,.csv" hidden>
             <label class="fld" style="max-width:170px">Session date<input id="gym-date" type="date"></label>
             <span style="font-size:11.5px;color:var(--text3)">.txt / .csv — saved on this device; feeds the muscle model</span>
@@ -1051,7 +1106,7 @@
           </div>
           <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
             <button class="btn primary" onclick="addTest()">＋ Log result</button>
-            <button class="btn" onclick="document.getElementById('ts-file').click()">📄 Upload CSV</button>
+            <button class="btn" onclick="document.getElementById('ts-file').click()">Upload CSV</button>
             <input type="file" id="ts-file" accept=".csv,.txt" hidden>
             <span style="font-size:11.5px;color:var(--text3)">CSV format: date, metric, value</span>
           </div>
@@ -1130,7 +1185,7 @@
       <div class="note" id="log-offline" style="display:none;margin-bottom:16px">Logging is <b>read-only</b> right now — this page isn't talking to the local server, so water, weight and check-ins can't be written back.</div>
       <div class="g2">
         <div class="card">
-          <div class="card-title">💧 Water <span class="tag">writes to Garmin</span></div>
+          <div class="card-title">Water <span class="tag">writes to Garmin</span></div>
           <div class="metric" id="log-water">—<small id="log-water-goal"> / 2500 ml</small></div>
           <div class="water-bar"><i id="log-water-fill" style="width:0%"></i></div>
           <div class="logrow">
@@ -1142,7 +1197,7 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title">⚖️ Weight <span class="tag">writes to Garmin</span></div>
+          <div class="card-title">Weight <span class="tag">writes to Garmin</span></div>
           <div class="metric" id="log-kg-now">—<small>kg</small></div>
           <div class="logrow">
             <input type="number" step="0.1" id="log-kg" class="log-in" style="width:110px" placeholder="kg">
@@ -1153,7 +1208,7 @@
         </div>
       </div>
       <div class="card" style="margin-top:18px">
-        <div class="card-title">📝 Daily check-in <span class="tag">saved locally — feeds verdict &amp; muscle model</span></div>
+        <div class="card-title">Daily check-in <span class="tag">saved locally — feeds verdict &amp; muscle model</span></div>
         <div class="log-lab">Session effort (RPE 1–10)</div><div class="seg" data-seg="rpe" data-n="10"></div>
         <div class="log-lab">Muscle soreness (1 fresh → 5 wrecked)</div><div class="seg" data-seg="soreness" data-n="5"></div>
         <div class="log-lab">How sleep felt (1 poor → 5 great)</div><div class="seg" data-seg="sleepQuality" data-n="5"></div>
@@ -1176,7 +1231,7 @@
           <button class="btn" onclick="fakeSync()">Sync</button>
         </div>
         <div class="conn">
-          <div class="c-ic" style="background:rgba(255,110,102,.12);color:var(--red)">♥</div>
+          <div class="c-ic" style="background:rgba(255,110,102,.12);color:var(--red)"><svg viewBox="0 0 18 18" width="20" height="20" fill="currentColor"><path d="M8.529,15.222c.297,.155,.644,.155,.941,0,1.57-.819,6.529-3.787,6.529-8.613,.008-2.12-1.704-3.846-3.826-3.859-1.277,.016-2.464,.66-3.173,1.72-.71-1.06-1.897-1.704-3.173-1.72-2.123,.013-3.834,1.739-3.826,3.859,0,4.826,4.959,7.794,6.529,8.613Z"/></svg></div>
           <div class="c-body">
             <div class="c-name">Apple Health</div>
             <div class="c-sub">Secondary source · Garmin wins on overlap</div>

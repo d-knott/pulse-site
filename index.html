@@ -1312,9 +1312,53 @@
     <button type="submit" style="background:#79E2D7;border:0;border-radius:999px;padding:12px 22px;font-weight:600;font-size:15px;cursor:pointer">Unlock</button>
   </form>
 </div>
+<style>
+  #pulse-banner{display:none;position:fixed;left:50%;transform:translateX(-50%);z-index:99998;max-width:calc(100vw - 32px);background:#1b1f1f;border:1px solid #313938;border-radius:999px;padding:10px 16px;font:600 13px/1.3 'General Sans',system-ui,sans-serif;color:#eef2f1;box-shadow:0 8px 28px rgba(0,0,0,.45);align-items:center;gap:10px;cursor:pointer;min-height:44px;
+    bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  #pulse-banner.on{display:flex}
+  @media (max-width:760px){ #pulse-banner{bottom:calc(74px + env(safe-area-inset-bottom,0px));left:16px;right:16px;transform:none;max-width:none;border-radius:16px} }   /* sits above the phone nav bar */
+</style>
+<div id="pulse-banner" role="status">
+  <span id="pulse-banner-dot" style="width:8px;height:8px;border-radius:50%;background:#ffc966;flex-shrink:0"></span><span id="pulse-banner-txt"></span>
+</div>
 <script>
 (function(){
-  const LS_KEY='pulse.passphrase', ENC='app.enc', enc=new TextEncoder(), dec=new TextDecoder();
+  const LS_KEY='pulse.passphrase', REM_KEY='pulse.remember', ENC='app.enc', enc=new TextEncoder(), dec=new TextDecoder();
+  /* Phase 4 (29 Sep 26): freshness + update banner.
+     - ENC_TAG is the ETag / Last-Modified of the app.enc this page decrypted. pulseCheckFresh()
+       HEADs app.enc (when the tab becomes visible, when the network comes back, every 15 min)
+       and shows "New sync available — tap to reload" when it differs.
+     - A new sw.js that installs while the app is open shows "New version of Pulse — tap to reload".
+     - If app.enc came from the service-worker cache (X-Pulse-Cache: hit — the network was slow or
+       off) the banner reads "Offline — showing the copy synced <date>" and stays until fresh data
+       is confirmed. Nothing reloads by itself; the banner is a tap. */
+  let ENC_TAG=null, OFFLINE_COPY=false, UPDATE_KIND=null;
+  const banner=(kind,txt,color)=>{ const b=document.getElementById('pulse-banner'); if(!b) return; UPDATE_KIND=kind;
+    document.getElementById('pulse-banner-txt').textContent=txt; document.getElementById('pulse-banner-dot').style.background=color||'#ffc966';
+    b.classList.add('on'); b.onclick=()=>{ if(kind==='offline'){ pulseCheckFresh(true); } else location.reload(); }; };
+  const hideBanner=()=>{ const b=document.getElementById('pulse-banner'); if(b) b.classList.remove('on'); UPDATE_KIND=null; };
+  window.pulseBanner=banner; window.pulseHideBanner=hideBanner;
+  const rememberOn=()=>{ try{ return localStorage.getItem(REM_KEY)!=='0'; }catch(e){ return true; } };
+  window.pulseRemember=function(on){ try{ localStorage.setItem(REM_KEY,on?'1':'0'); if(!on) localStorage.removeItem(LS_KEY); else if(window.__pulsePass) localStorage.setItem(LS_KEY,window.__pulsePass); }catch(e){} };
+  window.pulseRememberOn=rememberOn;
+  let checking=false;
+  async function pulseCheckFresh(fromTap){
+    if(checking) return; checking=true;
+    try{
+      const h=await fetch(ENC,{method:'HEAD',cache:'no-store'});
+      if(!h.ok) return;
+      const tag=h.headers.get('etag')||h.headers.get('last-modified');
+      const fromNet=h.headers.get('X-Pulse-Cache')!=='hit';
+      if(!fromNet){ if(fromTap) banner('offline', offlineText(), '#ff6e66'); return; }
+      if(tag && ENC_TAG && tag!==ENC_TAG){ banner('update','New sync available — tap to reload','#a6fb99'); return; }
+      if(OFFLINE_COPY){ OFFLINE_COPY=false; if(UPDATE_KIND==='offline') hideBanner(); }
+      if(fromTap && typeof window.toast==='function') window.toast('You have the latest sync');
+    }catch(e){ if(fromTap && UPDATE_KIND==='offline') banner('offline', offlineText(), '#ff6e66'); }
+    finally{ checking=false; }
+  }
+  window.pulseCheckFresh=pulseCheckFresh;
+  const offlineText=()=>{ let when=''; try{ const g=window.GARMIN_DATA&&window.GARMIN_DATA.meta&&window.GARMIN_DATA.meta.generatedAt; if(g){ const d=new Date(g); when=' synced '+d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); } }catch(e){}
+    return 'Offline — showing the copy'+(when||' from the last sync')+' · tap to retry'; };
   const msg=t=>{document.getElementById('lock-msg').textContent=t;};
   const showForm=()=>{ const f=document.getElementById('lock-form'); if(f) f.style.display='flex'; };
   /* Device unlock (fix 4.4, 29 Sep 26): the passphrase is remembered on this device (localStorage,
@@ -1334,6 +1378,7 @@
   async function unlock(pass){
     const r=await fetch(ENC,{cache:'no-store'});
     if(!r.ok) throw Object.assign(new Error(),{nodata:true});
+    ENC_TAG=r.headers.get('etag')||r.headers.get('last-modified'); OFFLINE_COPY=r.headers.get('X-Pulse-Cache')==='hit';
     const b=new Uint8Array(await r.arrayBuffer());
     if(dec.decode(b.slice(0,6))!=='PULSE1') throw Object.assign(new Error(),{nodata:true});
     const key=await deriveKey(pass,b.slice(6,22));
@@ -1346,8 +1391,13 @@
     s.textContent=payload.main; document.body.appendChild(s);
     const nm=window.GARMIN_DATA&&window.GARMIN_DATA.athlete&&window.GARMIN_DATA.athlete.name;
     if(nm) document.querySelectorAll('.u-name, .kv .v').forEach(e=>{if(e.textContent==='Athlete')e.textContent=nm;});
-    try{localStorage.setItem(LS_KEY,pass);}catch(e){}
+    window.__pulsePass=pass;
+    try{ if(rememberOn()) localStorage.setItem(LS_KEY,pass); else localStorage.removeItem(LS_KEY); }catch(e){}
     const lk=document.getElementById('lockscreen'); if(lk)lk.remove();
+    if(OFFLINE_COPY) banner('offline', offlineText(), '#ff6e66');
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') pulseCheckFresh(); });
+    window.addEventListener('online',()=>pulseCheckFresh());
+    setInterval(()=>pulseCheckFresh(), 15*60*1000);
   }
 
   document.getElementById('lock-form').addEventListener('submit',async ev=>{
@@ -1359,7 +1409,12 @@
   });
 
   window.addEventListener('load',async()=>{
-    if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
+    if('serviceWorker' in navigator){ try{
+      const reg=await navigator.serviceWorker.register('sw.js');
+      const watch=w=>{ if(!w) return; w.addEventListener('statechange',()=>{ if(w.state==='installed' && navigator.serviceWorker.controller) banner('update','New version of Pulse — tap to reload','#a6fb99'); }); };
+      watch(reg.installing); reg.addEventListener('updatefound',()=>watch(reg.installing));
+      if(reg.waiting && navigator.serviceWorker.controller) banner('update','New version of Pulse — tap to reload','#a6fb99');
+    }catch(e){} }
     let fromUrl=null;
     try{ const m=/[#&]k=([^&]+)/.exec(location.hash||''); if(m){ fromUrl=decodeURIComponent(m[1]); history.replaceState(null,'',location.pathname+location.search); } }catch(e){}
     const saved=(()=>{try{return localStorage.getItem(LS_KEY);}catch(e){return null;}})();

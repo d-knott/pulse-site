@@ -311,9 +311,9 @@
     .card:has(table){overflow-x:auto}
     .card table{min-width:620px}
     /* Today summary */
-    .hero{flex-direction:column;align-items:flex-start;gap:14px;padding:18px}
-    .hero .verdict{font-size:28px}
-    .hero > div[style*="text-align:right"]{text-align:left !important}
+    .hero{padding:16px}
+    .hs-name{font-size:18px}
+    .gate-chip{font-size:13px;padding:8px 12px}
     .glance-row .gt{width:72px;font-size:11.5px}
     .glance-row .gs{white-space:normal;font-size:11.5px}
     .sg-grid{grid-template-columns:1fr 1fr}
@@ -508,6 +508,31 @@
           </div>
         </div>
       </div>
+      <div class="mt" id="whatif-host">
+        <div class="card">
+          <div class="card-title">What-if check <span class="tag">a run you are thinking about, against today's gate</span></div>
+          <div class="form-row">
+            <label class="fld">Session type
+              <select id="pr-type">
+                <option value="easy">Easy run</option><option value="recovery">Recovery jog</option>
+                <option value="tempo">Tempo / threshold</option><option value="intervals" selected>Intervals / track</option>
+                <option value="long">Long run</option>
+                <option value="strides">Strides / sprints</option><option value="hills">Hill repeats</option>
+                <option value="downhill">Downhill run</option><option value="trail">Trail run</option>
+              </select></label>
+            <label class="fld">Distance (km)<input id="pr-dist" type="number" value="10" min="3" max="42" step="0.5"></label>
+            <label class="fld">Day
+              <select id="pr-date"></select></label>
+            <label class="fld">Goal
+              <select id="pr-goal"><option>10K race prep</option><option>Base building</option><option>HM race prep</option><option>General fitness</option></select></label>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center">
+            <button class="btn primary" onclick="whatIf()">Check against the gate</button>
+            <span style="font-size:11.5px;color:var(--text3)">Nothing is added to the plan — the plan lives in Intervals.icu.</span>
+          </div>
+          <div id="whatif-result"></div>
+        </div>
+      </div>
     </section>
 
     <!-- ============ TAB: ACTIVITY ============ -->
@@ -546,8 +571,7 @@
           <div class="cal-head">
             <span class="cal-month" id="cal-title">July 2026</span>
             <div style="display:flex;align-items:center;gap:10px">
-              <span class="pill" style="font-size:11px"><span class="dot"></span> Google Calendar · synced</span>
-              <span class="pill" style="font-size:11px"><span class="dot"></span> Garmin</span>
+              <span class="pill" style="font-size:11px" id="cal-src-pill"><span class="dot"></span> Intervals.icu · Garmin · Calendar</span>
               <div class="cal-nav"><button onclick="calNav(-1)">‹</button><button onclick="calNav(1)">›</button></div>
             </div>
           </div>
@@ -570,11 +594,7 @@
             </div>
             <button class="btn primary" style="margin-top:12px" onclick="addCalEvent()">＋ Add to day</button>
           </div>
-          <div class="card mt">
-            <div class="card-title">Training plans <span class="tag">apply to calendar</span></div>
-            <div id="plan-list"></div>
-            <div class="note">Garmin Coach plans adapt future sessions to your logged performance — full adaptivity arrives with the live Garmin link.</div>
-          </div>
+          <div class="note" style="margin-top:14px">The plan is Intervals.icu — planned sessions appear here from the sync, completed ones from Garmin, fixtures and travel from your calendar. Anything you add below is a one-off note on this device.</div>
         </div>
       </div>
     </section>
@@ -600,31 +620,8 @@
         </div>
       </div>
 
-      <h2 class="sec">Plan your runs</h2>
-      <div class="grid g23">
-        <div class="card">
-          <div class="card-title">Run planner <span class="tag">checks your current fatigue before planning</span></div>
-          <div class="form-row">
-            <label class="fld">Session type
-              <select id="pr-type">
-                <option value="easy">Easy run</option><option value="recovery">Recovery jog</option>
-                <option value="tempo">Tempo / threshold</option><option value="intervals" selected>Intervals / track</option>
-                <option value="long">Long run</option>
-                <option value="strides">Strides / sprints</option><option value="hills">Hill repeats</option>
-                <option value="downhill">Downhill run</option><option value="trail">Trail run</option>
-              </select></label>
-            <label class="fld">Distance (km)<input id="pr-dist" type="number" value="10" min="3" max="42" step="0.5"></label>
-            <label class="fld">Day
-              <select id="pr-date"></select></label>
-            <label class="fld">Goal
-              <select id="pr-goal"><option>10K race prep</option><option>Base building</option><option>HM race prep</option><option>General fitness</option></select></label>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:14px">
-            <button class="btn primary" onclick="planRun()">＋ Plan this run</button>
-            <button class="btn" onclick="autoPlanWeek()">✨ Auto-plan my week</button>
-          </div>
-          <div id="planned-list"></div>
-        </div>
+      <h2 class="sec">Training paces</h2>
+      <div class="grid g2">
         <div class="card">
           <div class="card-title">Your training paces <span class="tag">from current VO₂ max 51</span></div>
           <div class="kv"><span class="k">Recovery</span><span class="v">6:00–6:20 /km · &lt;125 bpm</span></div>
@@ -1030,8 +1027,6 @@
         <button class="btn primary" style="margin-top:12px" onclick="addLibSession()">＋ Save to library</button>
       </div>
 
-      <h2 class="sec">Programs & plans</h2>
-      <div class="grid g2" id="lib-programs"></div>
     </section>
 
     <!-- ============ TAB: TESTING & BODY ============ -->
@@ -1213,11 +1208,10 @@
           </table>
         </div>
         <div class="card">
-          <div class="card-title">Sync preferences</div>
-          <div class="kv"><span class="k">Auto sync</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
-          <div class="kv"><span class="k">Sync activities</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
-          <div class="kv"><span class="k">Sync sleep & HRV</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
-          <div class="kv"><span class="k">Sync body composition</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+          <div class="card-title">How the sync works</div>
+          <div class="kv"><span class="k">Schedule</span><span class="v">09:30 &amp; 22:30 SAST</span></div>
+          <div class="kv"><span class="k">On demand</span><span class="v">Sync button (any tab)</span></div>
+          <div class="kv"><span class="k">Plan source</span><span class="v">Intervals.icu</span></div>
           <div class="note">Data arrives from the Garmin sync twice a day (09:30 and 22:30) or whenever you tap Sync. Health, sleep, HRV, readiness, load and activities are read straight from Garmin; muscle fatigue is modelled from them (v3 running model, v2 EMG shares for hockey and gym). Intervals.icu supplies the plan.</div>
         </div>
       </div>
@@ -1231,25 +1225,18 @@
           <div class="kv"><span class="k">Name</span><span class="v">Athlete</span></div>
           <div class="kv"><span class="k">Age</span><span class="v">23 (15 Apr 2003)</span></div>
           <div class="kv"><span class="k">Height</span><span class="v">179 cm</span></div>
-          <div class="kv"><span class="k">Weight</span><span class="v">73.7 kg (Mar 25 baseline)</span></div>
-          <div class="kv"><span class="k">Max HR</span><span class="v">192 bpm</span></div>
+          <div class="kv"><span class="k">Weight</span><span class="v" id="prof-weight">73.7 kg (Mar 25 baseline)</span></div>
+          <div class="kv"><span class="k">Max HR</span><span class="v" id="prof-maxhr">192 bpm</span></div>
+          <div class="kv"><span class="k">Resting HR baseline</span><span class="v" id="prof-rhr">46 bpm</span></div>
+          <div class="kv"><span class="k">VO₂max</span><span class="v" id="prof-vo2">—</span></div>
           <div class="kv"><span class="k">Primary sports</span><span class="v">Hockey (midfield, WP) · Running · Strength</span></div>
         </div>
         <div class="card">
           <div class="card-title">Preferences</div>
           <div class="kv"><span class="k">Units</span><span class="v">Metric (km, kg)</span></div>
           <div class="kv"><span class="k">Week starts on</span><span class="v">Monday</span></div>
-          <div class="kv"><span class="k">Dark theme</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
-          <div class="kv"><span class="k">Morning readiness report</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
-          <div class="kv"><span class="k">Overtraining alerts</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
-          <div class="kv"><span class="k">Weekly summary email</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+          <div class="kv"><span class="k">Muscle fatigue model</span><span class="v">v3 running · v2 EMG shares (hockey, gym)</span></div>
         </div>
-      </div>
-      <div class="card mt">
-        <div class="card-title">Insight engine</div>
-        <div class="kv"><span class="k">Insight sensitivity</span><span class="v">Balanced</span></div>
-        <div class="kv"><span class="k">Muscle fatigue model</span><span class="v">v3 running load model · v2 EMG shares (hockey, gym)</span></div>
-        <div class="kv"><span class="k">Use my feedback to tune insights</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
       </div>
     </section>
 

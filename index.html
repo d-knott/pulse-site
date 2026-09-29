@@ -95,7 +95,7 @@
   .metric{font-size:30px;font-weight:700;letter-spacing:-.4px;margin:4px 0 2px}
   .metric small{font-size:14px;font-weight:600;color:var(--text2);margin-left:2px}
   .delta{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
-  .delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--text3)}
+  .delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--text3)} .delta.warn{color:var(--orange)}
   .spark{margin-top:10px;height:42px}
   .chart-wrap{position:relative;margin-top:12px}
   section.tab{display:none;animation:fadeIn .25s ease}
@@ -274,7 +274,7 @@
       -webkit-overflow-scrolling:touch;scrollbar-width:none;background:rgba(14,16,16,.96);backdrop-filter:blur(14px)}
     .sidebar::-webkit-scrollbar{display:none}
     .nav{flex-direction:row;gap:0;flex:none}
-    .nav-item{flex-direction:column;gap:3px;padding:7px 9px;min-width:62px;flex:none;border-radius:12px}
+    .nav-item{flex-direction:column;gap:3px;padding:7px 9px;min-width:62px;width:auto;flex:none;border-radius:12px} /* fix 1.1: the desktop rule sets width:100% — on the phone bar that stretched every item to the full nav width and pushed the icons off-screen */
     .nav-item span{display:block;font-size:9px;white-space:nowrap}
     .nav-item svg{width:19px;height:19px}
     .nav-sep,.sidebar-foot,.logo{display:none}
@@ -284,7 +284,18 @@
     .g4{grid-template-columns:1fr 1fr}
     .g3,.g2,.g23,.g32{grid-template-columns:1fr}
     .metric{font-size:26px}
-    .form-row{grid-template-columns:1fr 1fr !important}
+    .form-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important}
+    /* fix 1.18: grid tracks default to min-content, so any wide child (a select, a long
+       label, a 7-day calendar) widens the track past the viewport and the page scrolls
+       sideways. minmax(0,1fr) + min-width:0 on children keeps every tab at the screen width. */
+    .grid>*, .form-row>*, .fld, .fld select, .fld input, .cal-cell, .sg-grid>*, .am-grid>*, .pw-grid>*{min-width:0;max-width:100%}
+    .g4{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .cal-grid{grid-template-columns:repeat(7,minmax(0,1fr))}
+    .sg-grid,.am-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .pw-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .card{min-width:0}
+    .card:not(:has(table)){overflow-x:hidden}
+    .ta,textarea,select,input{max-width:100%}
     /* wide tables scroll inside their card */
     .card:has(table){overflow-x:auto}
     .card table{min-width:620px}
@@ -302,7 +313,7 @@
     .topbar,.header-right{flex-wrap:wrap}
   }
   @media(max-width:400px){
-    .g4{grid-template-columns:1fr}
+    .g4{grid-template-columns:minmax(0,1fr)}
     .sg-grid{grid-template-columns:1fr 1fr}
   }
   /* ---- Log tab ---- */
@@ -410,7 +421,7 @@
         <div class="sub" id="page-sub"></div>
       </div>
       <div class="header-right">
-        <div class="pill" id="sync-pill"><span class="dot"></span> Demo data — run garmin_sync.py</div>
+        <div class="pill" id="sync-pill"><span class="dot"></span> Demo data — no sync yet</div>
         <button class="btn" onclick="fakeSync()">⟳ Sync now</button>
       </div>
     </div>
@@ -978,12 +989,7 @@
         <div class="card">
           <div class="card-title">Upload a workout <span class="tag">paste sets or upload a file</span></div>
           <p style="font-size:12px;color:var(--text3);margin:8px 0 10px">Format: one exercise per line — <b style="color:var(--text2)">Exercise&nbsp; sets×reps&nbsp; weight</b> (e.g. “Back Squat 5x5 100kg”). Bodyweight moves can omit the weight.</p>
-          <textarea class="ta" id="gym-input">Back Squat 5x5 100kg
-Romanian Deadlift 3x8 90kg
-Walking Lunges 3x12 20kg
-Leg Curl 3x10 45kg
-Standing Calf Raise 4x15 60kg
-Plank 3x1 </textarea>
+          <textarea class="ta" id="gym-input" placeholder="Back Squat 5x5 100kg&#10;Romanian Deadlift 3x8 90kg&#10;Walking Lunges 3x12 20kg&#10;Leg Curl 3x10 45kg&#10;Standing Calf Raise 4x15 60kg&#10;Plank 3x1 "></textarea>
           <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
             <button class="btn primary" onclick="analyzeSession()">⚡ Analyse session</button>
             <button class="btn" onclick="document.getElementById('gym-file').click()">📄 Upload file</button>
@@ -1072,7 +1078,7 @@ Plank 3x1 </textarea>
             <label class="fld">Metric
               <select id="ts-metric"></select></label>
             <label class="fld">Value<input id="ts-value" type="number" step="0.1" placeholder="e.g. 76.2"></label>
-            <label class="fld">Date<input id="ts-date" type="date" value="2026-07-08"></label>
+            <label class="fld">Date<input id="ts-date" type="date" value=""></label>
           </div>
           <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
             <button class="btn primary" onclick="addTest()">＋ Log result</button>
@@ -1080,7 +1086,7 @@ Plank 3x1 </textarea>
             <input type="file" id="ts-file" accept=".csv,.txt" hidden>
             <span style="font-size:11.5px;color:var(--text3)">CSV format: date, metric, value</span>
           </div>
-          <div class="note">New entries update the charts, summary cards and history below immediately (stored in-session for the demo — persistent storage arrives with live sync).</div>
+          <div class="note">New entries update the charts, summary cards and history below immediately and are kept on this device.</div>
         </div>
         <div class="card">
           <div class="card-title">Body composition — SSISA testing history</div>
@@ -1152,7 +1158,7 @@ Plank 3x1 </textarea>
 
     <!-- ============ TAB: LOG ============ -->
     <section class="tab" id="tab-log">
-      <div class="note" id="log-offline" style="display:none;margin-bottom:16px">Logging is <b>read-only</b> right now — this page isn't talking to the local server. Run <b>python3 garmin_server.py</b> and open <b>http://localhost:8765/pulse-dashboard.html</b> to write water &amp; weight to Garmin and save check-ins.</div>
+      <div class="note" id="log-offline" style="display:none;margin-bottom:16px">Logging is <b>read-only</b> right now — this page isn't talking to the local server, so water, weight and check-ins can't be written back.</div>
       <div class="g2">
         <div class="card">
           <div class="card-title">💧 Water <span class="tag">writes to Garmin</span></div>
@@ -1196,9 +1202,9 @@ Plank 3x1 </textarea>
           <div class="c-ic" style="background:rgba(121,226,215,.14);color:var(--teal)">G</div>
           <div class="c-body">
             <div class="c-name">Garmin Connect</div>
-            <div class="c-sub"><span style="color:var(--green)">● Connected</span> · via garmin_sync.py + cached token</div>
+            <div class="c-sub"><span style="color:var(--green)">● Connected</span> · twice-daily sync + tap Sync</div>
           </div>
-          <button class="btn" onclick="toast('Refresh: run garmin_sync.py in the Health & Fitness folder (or start garmin_server.py and use Pull latest)')">Refresh</button>
+          <button class="btn" onclick="fakeSync()">Sync</button>
         </div>
         <div class="conn">
           <div class="c-ic" style="background:rgba(255,110,102,.12);color:var(--red)">♥</div>
@@ -1212,9 +1218,9 @@ Plank 3x1 </textarea>
           <div class="c-ic" style="background:rgba(255,201,102,.14);color:var(--orange)">S</div>
           <div class="c-body">
             <div class="c-name">Strava</div>
-            <div class="c-sub">Not connected · phase 2</div>
+            <div class="c-sub">Parked — Strava API access needs a subscription</div>
           </div>
-          <button class="btn primary" onclick="toast('Placeholder — live integration comes after design sign-off')">Connect</button>
+          <button class="btn" onclick="toast('Strava is parked until the API subscription is on — race predictions use your Garmin VO₂max meanwhile')">Parked</button>
         </div>
       </div>
 
@@ -1238,7 +1244,7 @@ Plank 3x1 </textarea>
           <div class="kv"><span class="k">Sync activities</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
           <div class="kv"><span class="k">Sync sleep & HRV</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
           <div class="kv"><span class="k">Sync body composition</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-          <div class="note">Live pipeline: <b>garmin_sync.py</b> (cron on your Mac) writes <b>data.js</b>, which this dashboard reads on every refresh. Health, sleep, HRV, readiness, load and activities are real; muscle fatigue, hockey sprint detail and some weekly aggregates are still modelled until the next sync upgrade. Apple Health merges as a secondary source via export.</div>
+          <div class="note">Data arrives from the Garmin sync twice a day (09:30 and 22:30) or whenever you tap Sync. Health, sleep, HRV, readiness, load and activities are read straight from Garmin; muscle fatigue is modelled from them (v3 running model, v2 EMG shares for hockey and gym). Intervals.icu supplies the plan.</div>
         </div>
       </div>
     </section>
@@ -1268,9 +1274,8 @@ Plank 3x1 </textarea>
       <div class="card mt">
         <div class="card-title">Insight engine</div>
         <div class="kv"><span class="k">Insight sensitivity</span><span class="v">Balanced</span></div>
-        <div class="kv"><span class="k">Muscle fatigue model</span><span class="v">v0.1 (heuristic, mock)</span></div>
+        <div class="kv"><span class="k">Muscle fatigue model</span><span class="v">v3 running load model · v2 EMG shares (hockey, gym)</span></div>
         <div class="kv"><span class="k">Use my feedback to tune insights</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
-        <div class="note">Settings on this page are non-functional placeholders for layout review.</div>
       </div>
     </section>
 

@@ -68,7 +68,7 @@
   .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
   .sidebar-foot .u-name{font-weight:600;font-size:13px}
   .sidebar-foot .u-sub{font-size:11px;color:var(--text3)}
-  .main{margin-left:220px;flex:1;padding:24px 28px 60px;max-width:1240px}
+  .main{margin-left:220px;flex:1;padding:max(24px, env(safe-area-inset-top,0px)) 28px 60px;max-width:1240px}
   /* ---------- Header ---------- */
   .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
   .header h1{font-size:22px;font-weight:700}
@@ -316,7 +316,7 @@
     .subnav{width:100%;max-width:100%;margin:-4px 0 14px;border-radius:14px}
     .subnav .nav-item{padding:8px 12px;font-size:12px;flex:1 0 auto;justify-content:center;min-height:38px}
     .nav-sep,.sidebar-foot,.logo{display:none}
-    .main{margin-left:0;padding:14px 13px calc(86px + env(safe-area-inset-bottom));max-width:100%}
+    .main{margin-left:0;padding:calc(20px + env(safe-area-inset-top,0px)) 13px calc(86px + env(safe-area-inset-bottom));max-width:100%} /* header clears the iPhone status bar / Dynamic Island (black-translucent PWA) so Sync is tappable */
     .header h1{font-size:20px}
     /* grids: small stat cards 2-up, charts full width */
     .g4{grid-template-columns:1fr 1fr}

@@ -88,11 +88,12 @@
   .btn.primary:hover{filter:brightness(1.08);color:#0e1615}
   /* ---------- Cards & grid ---------- */
   .grid{display:grid;gap:16px}
-  .g4{grid-template-columns:repeat(4,1fr)}
-  .g3{grid-template-columns:repeat(3,1fr)}
-  .g2{grid-template-columns:repeat(2,1fr)}
-  .g23{grid-template-columns:2fr 1fr}
-  .g32{grid-template-columns:1fr 2fr}
+  .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g23{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+  .g32{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
+  .grid>*{min-width:0}
   .card{
     background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
     padding:18px 20px;position:relative;
@@ -300,7 +301,7 @@
   .pill-short{display:none}
   .sync-btn svg{width:15px;height:15px;vertical-align:-3px;margin-right:6px}
   /* ---------- Responsive ---------- */
-  @media(max-width:1080px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}.g23,.g32{grid-template-columns:1fr}}
+  @media(max-width:1080px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.g23,.g32{grid-template-columns:minmax(0,1fr)}}
   @media(max-width:760px){
     /* bottom tab bar (iOS-style), scrollable when tabs overflow */
     .sidebar{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;height:auto;
@@ -510,8 +511,6 @@
         </div>
       </div>
 
-      <h2 class="sec">Insights & feedback</h2>
-      <div class="grid g2" id="insights-today"></div>
     </section>
 
     <!-- ============ TAB: PLAN (Intervals.icu layer) ============ -->

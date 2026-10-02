@@ -800,24 +800,28 @@
 
     <!-- ============ TAB: RECOVERY ============ -->
     <section class="tab" id="tab-recovery">
-      <div class="grid g32">
-        <div class="card">
-          <div class="card-title">Recovery status</div>
-          <div style="display:flex;align-items:center;gap:20px;margin-top:10px">
-            <div class="ring" id="ring-recovery" style="width:130px;height:130px"></div>
-            <div>
-              <div style="font-size:17px;font-weight:800;color:var(--green)">Ready to train</div>
-              <p style="font-size:12.5px;color:var(--text2);margin-top:5px">HRV stable, RHR below average and sleep debt cleared. Suited to a moderate–hard session today.</p>
-              <div style="margin-top:10px"><span class="badge low">Full recovery in ~9 h</span></div>
-            </div>
+      <div class="card" id="rec-status">
+        <div class="card-title">Recovery status</div>
+        <div class="rst">
+          <div class="ring" id="ring-recovery" style="width:130px;height:130px"></div>
+          <div class="rst-main">
+            <div style="font-size:19px;font-weight:800;color:var(--green)">Ready to train</div>
+            <p style="font-size:12.5px;color:var(--text2);margin-top:5px">HRV stable, RHR below average and sleep debt cleared. Suited to a moderate–hard session today.</p>
+            <div style="margin-top:10px"><span class="badge low">Full recovery in ~9 h</span></div>
           </div>
-          <div class="kv" style="margin-top:16px"><span class="k">Sleep debt (7 d)</span><span class="v" style="color:var(--green)">−0.4 h</span></div>
-          <div class="kv"><span class="k">Training strain (yest.)</span><span class="v">High · 142 load</span></div>
-          <div class="kv"><span class="k">Stress balance</span><span class="v">Recovery > stress ✓</span></div>
+          <div class="rst-kv">
+            <div class="kv"><span class="k">Sleep debt (7 d)</span><span class="v" style="color:var(--green)">−0.4 h</span></div>
+            <div class="kv"><span class="k">Training strain (yest.)</span><span class="v">High · 142 load</span></div>
+            <div class="kv"><span class="k">Stress balance</span><span class="v">Recovery > stress ✓</span></div>
+          </div>
         </div>
+      </div>
+
+      <div class="grid g23 mt" id="rec-row">
+        <div class="card" id="rec-score"></div>
         <div class="card">
           <div class="card-title">HRV — 30 days vs baseline band</div>
-          <div class="chart-wrap" style="height:270px"><canvas id="ch-hrv30"></canvas></div>
+          <div class="chart-wrap" style="height:220px"><canvas id="ch-hrv30"></canvas></div>
         </div>
       </div>
 

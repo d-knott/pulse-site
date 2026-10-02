@@ -73,6 +73,7 @@
   .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
   .header h1{font-size:22px;font-weight:700}
   .header .sub{color:var(--text2);font-size:13px;margin-top:2px}
+  .header.is-today .sub{color:var(--text);font-size:16px;font-weight:600;margin-top:4px;letter-spacing:.1px}   /* Today: the date is the one place it shows */
   .header-right{display:flex;align-items:center;gap:10px}
   .pill{
     display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:99px;
@@ -347,6 +348,7 @@
     .header > div:first-child{flex:1;min-width:0}
     .header h1{font-size:20px;line-height:1.15}
     .header .sub{display:none}
+    .header.is-today .sub{display:block;font-size:14px;margin-top:3px}
     .header-right{flex:none;gap:6px;flex-wrap:nowrap}
     .header-right .pill{padding:6px 10px;font-size:11px} .pill-full{display:none} .pill-short{display:inline}
     .sync-btn{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
@@ -440,7 +442,7 @@
 
   <!-- ============ MAIN ============ -->
   <main class="main">
-    <div class="header">
+    <div class="header is-today">
       <div>
         <h1 id="page-title">Today</h1>
         <div class="sub" id="page-sub"></div>
@@ -558,31 +560,6 @@
             <div class="card-title">Next 14 days</div>
             <div id="plan-upcoming"></div>
           </div>
-        </div>
-      </div>
-      <div class="mt" id="whatif-host">
-        <div class="card">
-          <div class="card-title">What-if check <span class="tag">a run you are thinking about, against today's gate</span></div>
-          <div class="form-row">
-            <label class="fld">Session type
-              <select id="pr-type">
-                <option value="easy">Easy run</option><option value="recovery">Recovery jog</option>
-                <option value="tempo">Tempo / threshold</option><option value="intervals" selected>Intervals / track</option>
-                <option value="long">Long run</option>
-                <option value="strides">Strides / sprints</option><option value="hills">Hill repeats</option>
-                <option value="downhill">Downhill run</option><option value="trail">Trail run</option>
-              </select></label>
-            <label class="fld">Distance (km)<input id="pr-dist" type="number" value="10" min="3" max="42" step="0.5"></label>
-            <label class="fld">Day
-              <select id="pr-date"></select></label>
-            <label class="fld">Goal
-              <select id="pr-goal"><option>10K race prep</option><option>Base building</option><option>HM race prep</option><option>General fitness</option></select></label>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center">
-            <button class="btn primary" onclick="whatIf()">Check against the gate</button>
-            <span style="font-size:11.5px;color:var(--text3)">Nothing is added to the plan — the plan lives in Intervals.icu.</span>
-          </div>
-          <div id="whatif-result"></div>
         </div>
       </div>
     </section>

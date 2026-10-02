@@ -981,10 +981,10 @@
     <!-- ============ TAB: GYM SESSIONS ============ -->
     <section class="tab" id="tab-gym">
       <div class="grid g4">
-        <div class="card"><div class="card-title">Sessions this week</div><div class="metric">3</div><span class="delta flat">— Lower · Push · Upload pending</span></div>
-        <div class="card"><div class="card-title">Weekly volume</div><div class="metric">24.7<small>t</small></div><span class="delta up">▲ 8% vs 4-wk avg</span></div>
-        <div class="card"><div class="card-title">Avg session strain</div><div class="metric" style="color:var(--orange)">Mod</div><span class="delta flat">— Load 78–96 per session</span></div>
-        <div class="card"><div class="card-title">Recovery debt</div><div class="metric">~18<small>h</small></div><span class="delta down">▲ Driven by quads & calves</span></div>
+        <div class="card"><div class="card-title">This week</div><div class="metric">—</div><span class="delta flat"></span></div>
+        <div class="card"><div class="card-title">Volume · 4 weeks</div><div class="metric">—</div><span class="delta flat"></span></div>
+        <div class="card"><div class="card-title">Session load · 4 weeks</div><div class="metric">—</div><span class="delta flat"></span></div>
+        <div class="card"><div class="card-title">Most loaded muscle</div><div class="metric">—</div><span class="delta flat"></span></div>
       </div>
 
       <div class="grid g23 mt">
@@ -992,7 +992,11 @@
           <div class="card-title">Upload a workout <span class="tag">paste sets or upload a file</span></div>
           <p style="font-size:12px;color:var(--text3);margin:8px 0 10px">Format: one exercise per line — <b style="color:var(--text2)">Exercise&nbsp; sets×reps&nbsp; weight</b> (e.g. “Back Squat 5x5 100kg”). Bodyweight moves can omit the weight.</p>
           <textarea class="ta" id="gym-input" placeholder="Back Squat 5x5 100kg&#10;Romanian Deadlift 3x8 90kg&#10;Walking Lunges 3x12 20kg&#10;Leg Curl 3x10 45kg&#10;Standing Calf Raise 4x15 60kg&#10;Plank 3x1 "></textarea>
-          <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+          <div style="display:flex;gap:10px;margin-top:12px;align-items:flex-end;flex-wrap:wrap">
+            <label class="fld" style="flex:1;min-width:180px">Session name<input id="gym-name" placeholder="e.g. SSISA Gym C — upper"></label>
+            <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text2);padding-bottom:10px"><input type="checkbox" id="gym-tolib" checked> Save to Library</label>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap">
             <button class="btn primary" onclick="analyzeSession()">Analyse session</button>
             <button class="btn" onclick="document.getElementById('gym-file').click()">Upload file</button>
             <input type="file" id="gym-file" accept=".txt,.csv" hidden>
@@ -1026,15 +1030,15 @@
         </div>
         <div style="display:flex;gap:10px;margin-top:16px">
           <button class="btn primary" onclick="applySession()">✓ Apply to fatigue model</button>
-          <button class="btn" onclick="document.getElementById('gym-result').style.display='none'">Discard</button>
+          <button class="btn" onclick="document.getElementById('gym-result').style.display='none';GYM_EDIT_KEY=null">Discard</button>
           <span style="font-size:11.5px;color:var(--text3);align-self:center">Applying updates the Muscle Load tab &amp; recovery estimates</span>
         </div>
       </div>
 
-      <h2 class="sec">Past uploaded sessions</h2>
+      <h2 class="sec">Past sessions <span style="font-size:11.5px;font-weight:400;color:var(--text3)">· tap a session for the full workout</span></h2>
       <div class="card" style="padding:8px 14px">
         <table id="tbl-gym">
-          <thead><tr><th>Session</th><th>Date</th><th>Volume</th><th>Load</th><th>Top muscles</th><th>Strain</th><th></th></tr></thead>
+          <thead><tr><th>Session</th><th>Date</th><th>Source</th><th>Volume</th><th>Load</th><th>Top muscles</th><th>Status</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>

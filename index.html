@@ -11,13 +11,14 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <meta name="robots" content="noindex, nofollow">
+<meta name="pulse-build" content="3af85cbd29">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pulse — Health & Training Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0c0d0d; --bg2:#101313; --card:#151818; --card2:#1b1f1f;
+    --bg:#0c0d0d; --bg2:#101313; --card:#161a1a; --card2:#1d2121;   /* 5 Nov 26: cards sit one step above the page instead of blurring into it */
     --border:#242a29; --border2:#313938;
     --text:#eef2f1; --text2:#9aa6a3; --text3:#8a9592;   /* Phase 3.2: #68716f was 3.6:1 on --card; #8a9592 is 5.8:1 (AA) */
     --teal:#79e2d7; --blue:#95b9ff; --purple:#bfa8ff; --orange:#ffc966;
@@ -88,7 +89,8 @@
   .btn.primary{background:var(--teal);border:1px solid var(--teal);color:#0e1615}
   .btn.primary:hover{filter:brightness(1.08);color:#0e1615}
   /* ---------- Cards & grid ---------- */
-  .grid{display:grid;gap:16px}
+  .grid{display:grid;gap:16px} .grid>*{min-width:0}
+  .main{min-width:0}
   .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
   .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
   .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -99,23 +101,23 @@
     background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
     padding:18px 20px;position:relative;
   }
-  .card-title{font-size:12.5px;font-weight:500;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+  .card-title{font-size:12.5px;font-weight:600;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;letter-spacing:.01em}
   .card-title .tag{font-size:11px;padding:3px 10px;border-radius:99px;background:var(--card2);border:1px solid var(--border);color:var(--text3)}
   .card-title .t-ic{width:28px;height:28px;border-radius:9px;background:var(--card2);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:13px}
-  .metric{font-size:30px;font-weight:700;letter-spacing:-.4px;margin:4px 0 2px}
-  .metric small{font-size:14px;font-weight:600;color:var(--text2);margin-left:2px}
-  .delta{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+  .metric{font-size:30px;font-weight:700;letter-spacing:-.4px;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+  .metric small{font-size:14px;font-weight:500;color:var(--text3);margin-left:3px;letter-spacing:0}
+  .delta{font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
   .delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--text3)} .delta.warn{color:var(--orange)}
   /* Phase 3.7: two-point comparisons are a stat with an arrow; colour-band charts carry a legend */
   .two-pt{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 6px 6px}
-  .tp-side{text-align:center;flex:1;min-width:0} .tp-v{font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1} .tp-l{font-size:11px;color:var(--text3);margin-top:6px}
+  .tp-side{text-align:center;flex:1;min-width:0} .tp-v{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums} .tp-l{font-size:11px;color:var(--text3);margin-top:6px}
   .tp-arrow{font-size:17px;font-weight:700;white-space:nowrap} .tp-arrow.up{color:var(--green)} .tp-arrow.down{color:var(--red)} .tp-arrow.flat{color:var(--text3)}
   .tp-note{font-size:11px;color:var(--text3);margin-top:10px}
   .chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text2);margin-top:8px}
   .chart-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
   .spark{margin-top:10px;height:42px}
   .chart-wrap{position:relative;margin-top:12px}
-  section.tab{display:none;animation:fadeIn .25s ease}
+  section.tab{display:none} body.booted section.tab{animation:fadeIn .25s ease}   /* 5 Nov 26: no fade on first paint — the app used to appear ghosted while the main thread was still busy */
   section.tab.active{display:block}
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   .mt{margin-top:16px}
@@ -217,8 +219,9 @@
   .stage-bar{display:flex;height:26px;border-radius:8px;overflow:hidden;margin-top:12px}
   .stage-bar div{height:100%}
   .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+  table td,table th{font-variant-numeric:tabular-nums}
   .kv:last-child{border-bottom:none}
-  .kv .k{color:var(--text2)} .kv .v{font-weight:700}
+  .kv .k{color:var(--text2)} .kv .v{font-weight:600;font-variant-numeric:tabular-nums}
   /* ---------- Gym sessions ---------- */
   .ta{width:100%;min-height:170px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
     color:var(--text);padding:12px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;resize:vertical;line-height:1.7}
@@ -290,9 +293,9 @@
   /* ---------- Toast ---------- */
   #toast{position:fixed;bottom:24px;right:24px;background:#1e2424;border:1px solid var(--teal);color:var(--text);padding:12px 18px;border-radius:12px;font-size:13px;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
   /* ---------- Phase 3.1: hierarchy — one main block per tab at full strength ---------- */
-  section.tab .card:not(.card-main){background:rgba(21,24,24,.6);border-color:transparent;border-radius:16px}
-  section.tab .card:not(.card-main) > .card-title{font-size:11.5px;color:var(--text3)}
-  section.tab .card.card-main{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:0 12px 32px rgba(0,0,0,.28)}
+  section.tab .card:not(.card-main){background:var(--card);border-color:transparent;border-radius:16px}
+  section.tab .card:not(.card-main) > .card-title{font-size:11.5px;color:var(--text3);font-weight:600}
+  section.tab .card.card-main{background:var(--card2);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:0 12px 32px rgba(0,0,0,.28)}
   section.tab .card.card-main > .card-title{font-size:14px;font-weight:600;color:var(--text)}
   .card .card,.insight,.plan-card,.m-row{background:var(--card2)}
   /* Phase 3.6: rows read as rows — the 3 px type stripe stays, the per-row gradient goes */
@@ -370,8 +373,6 @@
     .m-showall{min-height:44px}
     .cal-cell{min-height:64px;padding:5px 4px}
     .cal-chip{font-size:11px;padding:2px 4px}
-    .glance-row .gt{width:72px;font-size:11.5px}
-    .glance-row .gs{white-space:normal;font-size:11.5px}
     .sg-grid{grid-template-columns:1fr 1fr}
     .muscle-wrap{justify-content:center}
     .body-figs{margin:0 auto}
@@ -382,6 +383,22 @@
   @media(max-width:400px){
     .g4{grid-template-columns:minmax(0,1fr)}
     .sg-grid{grid-template-columns:1fr 1fr}
+  }
+  /* 5 Nov 26 — the middle band (761–1040 px: iPad, half-screen Mac). Until now only phone (≤760) and
+     wide desktop were designed; in between the 220 px sidebar + 7-column week strip + two-up cards
+     clipped the header and squeezed text one word per line. Here: icon rail, header wraps to two rows,
+     week strip becomes a snap scroller of full-size day cards, two-up cards go single column. */
+  @media(min-width:761px) and (max-width:1040px){
+    .sidebar{width:68px;padding:16px 8px}
+    .logo{justify-content:center;padding:4px 0 18px} .logo-name{display:none}
+    .sidebar .nav-item{justify-content:center;padding:11px 0;gap:0} .sidebar .nav-item span{display:none}
+    .sidebar .nav-item svg{width:20px;height:20px}
+    .sidebar-foot{justify-content:center;padding:12px 0} .sidebar-foot > div:not(.avatar){display:none}
+    .main{margin-left:68px;padding:22px 20px 60px}
+    .header{flex-wrap:wrap;row-gap:10px} .header-right{flex-wrap:wrap}
+    .g2,.g23,.g32,.g3{grid-template-columns:minmax(0,1fr)}
+    .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .subnav{max-width:100%}
   }
   /* ---- Log tab ---- */
   .log-lab{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin:14px 0 7px}
@@ -986,7 +1003,7 @@
     <section class="tab" id="tab-gym">
       <div class="grid g4">
         <div class="card"><div class="card-title">This week</div><div class="metric">—</div><span class="delta flat"></span></div>
-        <div class="card"><div class="card-title">Volume · 4 weeks</div><div class="metric">—</div><span class="delta flat"></span></div>
+        <div class="card"><div class="card-title">Lifted · 4 weeks</div><div class="metric">—</div><span class="delta flat"></span></div>
         <div class="card"><div class="card-title">Session load · 4 weeks</div><div class="metric">—</div><span class="delta flat"></span></div>
         <div class="card"><div class="card-title">Most loaded muscle</div><div class="metric">—</div><span class="delta flat"></span></div>
       </div>
@@ -1368,6 +1385,12 @@
     if(payload.intervals) (0,eval)(payload.intervals);        // optional window.INTERVALS (plan layer)
     const s=document.createElement('script');                 // run the dashboard app
     s.textContent=payload.main; document.body.appendChild(s);
+    /* shell/app drift (5 Nov 26): the markup this page was built with must match the app that just ran.
+       If not, pull a fresh shell past the HTTP cache (the worker caches what it gets) and reload once. */
+    try{ const sb=(document.querySelector('meta[name="pulse-build"]')||{}).content, ab=window.PULSE_APP_BUILD;
+      if(sb && ab && sb!==ab){ const k='pulse.shellReloaded';
+        if(sessionStorage.getItem(k)!==ab){ sessionStorage.setItem(k,ab); fetch('index.html',{cache:'reload'}).catch(()=>{}).then(()=>location.reload()); return; }
+        else banner('update','App shell is out of date — close every Pulse tab and open it again','#ffc966'); } }catch(e){}
     const nm=window.GARMIN_DATA&&window.GARMIN_DATA.athlete&&window.GARMIN_DATA.athlete.name;
     if(nm) document.querySelectorAll('.u-name, .kv .v').forEach(e=>{if(e.textContent==='Athlete')e.textContent=nm;});
     window.__pulsePass=pass;

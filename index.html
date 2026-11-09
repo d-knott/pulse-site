@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <meta name="robots" content="noindex, nofollow">
-<meta name="pulse-build" content="3af85cbd29">
+<meta name="pulse-build" content="f1619be38f">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pulse — Health & Training Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -540,16 +540,21 @@
       </div>
       <div id="plan-body" style="display:none">
         <div id="plan-flags"></div>
-        <div class="card">
-          <div class="card-title">This week <span class="tag" id="plan-week-tag"></span></div>
+        <div class="card" id="plan-week-card">
+          <div class="card-title"><span id="plan-week-title">This week</span>
+            <span class="pw-nav"><button class="pw-btn" id="pw-prev" title="Previous week (←)">‹</button><button class="pw-btn pw-today" id="pw-now">This week</button><button class="pw-btn" id="pw-next" title="Next week (→)">›</button><span class="tag" id="plan-week-tag"></span></span></div>
+          <div id="plan-week-sum" class="pw-sum"></div>
           <div id="plan-week" class="pw-grid"></div>
+          <div id="plan-health" class="pw-health"></div>
         </div>
         <div class="grid g3 mt">
           <div class="card">
             <div class="card-title">Adherence <span class="tag">rolling 4 weeks</span></div>
             <div class="metric" id="plan-adh" style="color:var(--teal)">—</div>
             <span class="delta flat" id="plan-adh-sub"></span>
-            <div class="chart-wrap" style="height:120px;margin-top:8px"><canvas id="ch-plan-adh"></canvas></div>
+            <div id="plan-adh-types" class="adh-types"></div>
+            <div class="chart-wrap" style="height:110px;margin-top:8px"><canvas id="ch-plan-adh"></canvas></div>
+            <div id="plan-adh-miss"></div>
           </div>
           <div class="card">
             <div class="card-title">Phase <span class="tag" id="plan-phase-n"></span></div>
@@ -1294,6 +1299,7 @@
   </main>
 </div>
 
+<script src="plan.js"></script><!-- optional whole-season plan (plan_compiler.py --export, 9 Nov 26); missing file is fine -->
 <!-- app script arrives encrypted via app.enc -->
 
 
@@ -1383,6 +1389,7 @@
     (0,eval)(payload.data);                                   // sets window.GARMIN_DATA
     if(payload.strava) (0,eval)(payload.strava);              // optional window.STRAVA
     if(payload.intervals) (0,eval)(payload.intervals);        // optional window.INTERVALS (plan layer)
+    if(payload.plan) (0,eval)(payload.plan);                  // optional window.PLAN_FULL (whole compiled season, 9 Nov 26)
     const s=document.createElement('script');                 // run the dashboard app
     s.textContent=payload.main; document.body.appendChild(s);
     /* shell/app drift (5 Nov 26): the markup this page was built with must match the app that just ran.

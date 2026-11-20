@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <meta name="robots" content="noindex, nofollow">
-<meta name="pulse-build" content="ff3db33731">
+<meta name="pulse-build" content="8866cb828b">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pulse — Health & Training Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -129,7 +129,8 @@
   .dotmeter .dm-track,.dotmeter .dm-fill{position:absolute;left:0;right:0;top:9px;height:6px;-webkit-mask:radial-gradient(circle at 3px 3px, #000 2.2px, transparent 2.7px) 0 0/7px 6px repeat-x;mask:radial-gradient(circle at 3px 3px, #000 2.2px, transparent 2.7px) 0 0/7px 6px repeat-x}
   .dotmeter .dm-track{background:var(--border2)}
   .dotmeter .dm-fill{background:linear-gradient(90deg,var(--red) 0%,var(--orange) 35%,var(--yellow) 62%,var(--green) 100%);clip-path:inset(0 calc(100% - var(--p)) 0 0)}
-  .dotmeter .dm-pill{position:absolute;top:1px;left:max(var(--p), 64px);transform:translateX(-100%);padding:3px 11px;border-radius:99px;font-size:11px;font-weight:500;white-space:nowrap;background:var(--green);color:var(--on-accent);box-shadow:0 0 0 3px var(--card), 0 0 14px color-mix(in srgb, var(--green) 55%, transparent)}
+  .dotmeter .dm-pill{position:absolute;top:1px;left:var(--p);transform:translateX(-100%);padding:3px 11px;border-radius:99px;font-size:11px;font-weight:500;white-space:nowrap;background:var(--green);color:var(--on-accent);box-shadow:0 0 0 3px var(--card), 0 0 14px color-mix(in srgb, var(--green) 55%, transparent)}
+  .dotmeter.low .dm-pill{transform:none;margin-left:6px}   /* short lit part: the pill sits after it instead of over it */
   .dotmeter.watch .dm-pill{background:var(--orange);color:#fff;box-shadow:0 0 0 3px var(--card), 0 0 14px color-mix(in srgb, var(--orange) 55%, transparent)}
   .dotmeter.act .dm-pill{background:var(--red);color:#fff;box-shadow:0 0 0 3px var(--card), 0 0 14px color-mix(in srgb, var(--red) 55%, transparent)}
   .dotmeter.neutral .dm-pill{background:var(--card2);color:var(--text2);box-shadow:0 0 0 3px var(--card)}
@@ -182,7 +183,8 @@
   .ring .ring-cap{font-size:11.5px;color:var(--text3);margin-top:3px}
   .ring-legend{flex:1;display:flex;flex-direction:column;gap:8px}
   .lg-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px}
-  .lg-row .lg-l{display:flex;align-items:center;gap:8px;color:var(--text2)}
+  .lg-row .lg-l{display:flex;align-items:center;gap:8px;color:var(--text2);white-space:nowrap}
+  .lg-row.stack{flex-direction:column;align-items:flex-start;gap:3px} .lg-row.stack .lg-v{padding-left:17px;font-weight:400;line-height:1.35}
   .lg-dot{width:9px;height:9px;border-radius:3px}
   .lg-v{font-weight:500}
   /* ---------- Insight cards ---------- */
@@ -271,7 +273,7 @@
   .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
   table td,table th{font-variant-numeric:tabular-nums}
   .kv:last-child{border-bottom:none}
-  .kv .k{color:var(--text2)} .kv .v{font-weight:500;font-variant-numeric:tabular-nums}
+  .kv .k{color:var(--text2);white-space:nowrap;flex:none;margin-right:12px} .kv .v{font-weight:500;font-variant-numeric:tabular-nums;min-width:0}
   /* ---------- Gym sessions ---------- */
   .ta{width:100%;min-height:170px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
     color:var(--text);padding:12px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;resize:vertical;line-height:1.7}
@@ -407,7 +409,7 @@
     .header.is-today .sub{display:block;font-size:14px;margin-top:3px}
     .header-right{flex:none;gap:6px;flex-wrap:nowrap}
     .header-right .pill{padding:6px 10px;font-size:11px} .pill-full{display:none} .pill-short{display:inline}
-    .sync-btn{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:12px}
+    .sync-btn,.theme-btn{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:12px}
     .sync-btn svg{margin:0;width:18px;height:18px} .sync-btn .sync-txt{display:none}
     .subnav{margin-top:0}
     /* Phase 3.3: 44 px touch targets */
@@ -434,7 +436,8 @@
     .topbar,.header-right{flex-wrap:wrap}
   }
   @media(max-width:400px){
-    .g4{grid-template-columns:minmax(0,1fr)}
+    .g4{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}   /* 20 Nov 26: stays 2-up — the lighter figures fit */
+    .metric{font-size:24px}
     .sg-grid{grid-template-columns:1fr 1fr}
   }
   /* 5 Nov 26 — the middle band (761–1040 px: iPad, half-screen Mac). Until now only phone (≤760) and
@@ -1342,7 +1345,7 @@
           <button data-mode="light" onclick="setTheme('light')">Light</button>
           <button data-mode="dark" onclick="setTheme('dark')">Dark</button>
         </div>
-        <div class="legend-note">Glass surfaces over a soft colour wash in both. Colour is kept for information — status, sport, zone — not decoration.</div>
+        <div class="legend-note">Match system follows your phone or Mac and switches live. Colour is kept for information — status, sport, zone — not decoration.</div>
       </div>
       <div class="grid g2 mt">
         <div class="card">

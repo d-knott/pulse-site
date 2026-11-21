@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <meta name="robots" content="noindex, nofollow">
-<meta name="pulse-build" content="24e2fd166d">
+<meta name="pulse-build" content="35935004db">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pulse — Health & Training Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -338,6 +338,16 @@
   .switch input:checked + .slider{background:var(--teal)}
   .switch input:checked + .slider::before{transform:translateX(18px)}
   .note{font-size:12px;color:var(--text3);background:var(--card2);border:1px dashed var(--border2);border-radius:12px;padding:12px 15px;margin-top:14px}
+  /* 21 Nov 26 — marathon block (Running tab) */
+  .mar-targets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 22px}
+  .mar-t{border-left:3px solid var(--border2);padding:1px 0 1px 12px;min-width:0}
+  .mar-t.good{border-left-color:var(--green)} .mar-t.watch{border-left-color:var(--orange)} .mar-t.act{border-left-color:var(--red)}
+  .mar-t b{display:block;font-size:13px;font-weight:500} .mar-t span{display:block;font-size:13px;color:var(--text2);margin-top:3px;font-variant-numeric:tabular-nums}
+  .mar-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:11.5px;color:var(--text3)}
+  .mar-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .mar-foot{font-size:11.5px;color:var(--text3);margin-top:10px}
+  .mar-goal-sel{background:var(--card2);border:1px solid var(--border2);border-radius:99px;color:var(--text2);padding:4px 10px;font-size:11.5px;font-family:inherit;max-width:100%}
+  @media(max-width:700px){.mar-targets{grid-template-columns:repeat(2,minmax(0,1fr))}}
   /* ---------- Tooltip ---------- */
   #tt{position:fixed;pointer-events:none;background:var(--tt-bg);border:1px solid var(--border2);border-radius:10px;padding:8px 12px;font-size:12px;z-index:99;display:none;box-shadow:var(--shadow)}
   #tt b{display:block;font-size:12.5px}
@@ -418,6 +428,7 @@
     .cal-nav button{width:44px;height:44px}
     .glance-row{min-height:52px}
     .fld select,.fld input,.log-in,.ta{min-height:44px}
+    .mar-goal-sel{min-height:44px;padding:4px 14px}
     .fld input[type=date]{min-width:150px}
     .seg button{min-height:44px;padding:8px 14px}
     .plan-x{min-width:44px;min-height:44px}
@@ -716,6 +727,38 @@
         <div class="card"><div class="card-title">Avg pace (Z2)</div><div class="metric">5:05<small>/km</small></div><span class="delta up">▲ 9 s faster vs 4-wk avg</span></div>
         <div class="card"><div class="card-title">Training status</div><div class="metric" style="font-size:24px;margin-top:8px">Productive</div><span class="delta up">▲ Fitness rising, fatigue in range</span></div>
         <div class="card"><div class="card-title">Race predictor</div><div class="metric" style="font-size:22px;margin-top:6px">10K · 44:20</div><span class="delta flat">— 5K 21:15 · HM 1:38:40</span></div>
+      </div>
+
+      <!-- 21 Nov 26 — marathon block: shown when the season plan carries a marathon A-race (filled by the marathon module) -->
+      <div id="mar-block" style="display:none">
+        <h2 class="sec" style="flex-wrap:wrap"><span id="mar-title">Marathon</span> <span class="seg-chip" id="mar-count" style="white-space:normal"></span></h2>
+        <div class="grid g4">
+          <div class="card"><div class="card-title">Goal</div><div class="metric" id="mar-goal">—</div><span class="delta flat" id="mar-goal-sub"></span><div style="margin-top:10px"><select class="mar-goal-sel" id="mar-goal-sel" aria-label="Marathon goal" onchange="setMarGoal(this.value)"></select></div></div>
+          <div class="card"><div class="card-title">Predicted today</div><div class="metric" id="mar-pred">—</div><span class="delta flat" id="mar-pred-sub"></span></div>
+          <div class="card"><div class="card-title">Running this week</div><div class="metric" id="mar-wk">—</div><span class="delta flat" id="mar-wk-sub"></span></div>
+          <div class="card"><div class="card-title">Longest run</div><div class="metric" id="mar-long">—</div><span class="delta flat" id="mar-long-sub"></span></div>
+        </div>
+        <div class="card mt">
+          <div class="card-title">Season to race day <span class="tag" id="mar-season-tag">planned run km per week</span></div>
+          <div class="chart-wrap" style="height:260px"><canvas id="ch-mar-season"></canvas></div>
+          <div class="mar-legend" id="mar-legend"></div>
+        </div>
+        <div class="card mt">
+          <div class="card-title">Did you hit this week's targets? <span class="tag" id="mar-week-tag"></span></div>
+          <div class="mar-targets" id="mar-targets"></div>
+        </div>
+        <div class="grid g2 mt">
+          <div class="card">
+            <div class="card-title">Run intensity by week <span class="tag">target ~80% easy</span></div>
+            <div class="chart-wrap" style="height:230px"><canvas id="ch-mar-intensity"></canvas></div>
+            <div class="mar-foot" id="mar-int-note"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Fitness vs fatigue <span class="tag">all training · Garmin load</span></div>
+            <div class="chart-wrap" style="height:230px"><canvas id="ch-mar-form"></canvas></div>
+            <div id="mar-form-note"></div>
+          </div>
+        </div>
       </div>
 
       <div class="grid g23 mt">
